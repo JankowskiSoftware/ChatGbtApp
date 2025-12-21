@@ -1,0 +1,65 @@
+﻿LoopCV logo
+Overview
+My loops
+Board
+All Matches
+My Applications
+Questions
+CV Checker
+CV Builder
+Inbox
+Match Details
+3
+Go back to the loop results
+Full Stack Engineer
+Idexcel
+Date Matched
+Sat Dec 20 2025
+Company
+Idexcel
+Location
+Harrisburg, PA
+Job Posting
+LinkedIn 
+Rate this match
+Scheduled interview
+
+CV Builder
+Timeline
+To continue, please complete your application manually.
+Job position matched with your search
+Sat Dec 20 2025
+Job Description
+Job Title - Senior Full-Stack .NET/React Developer [USC/GC only on w2]
+
+Job Location - 100% Remote [Harrisburg, Pennsylvania]
+
+USC/GC only on w2
+
+Duration: 6+ months contract
+
+
+
+Must work EST time zone hours
+
+
+
+Must-Haves:
+
+3–5 years of experience in full stack development.
+Strong knowledge of .NET Core / ASP.NET Core, C#, and React JS.
+Proficiency in JavaScript/TypeScript, HTML, and CSS.
+Experience working with relational (e.g., PostgreSQL, MySQL) and non-relational (e.g., MongoDB, Cosmos DB) databases.
+Solid understanding/experience of microservices, cloud (Azure or AWS), software testing practices and commitment to maintaining high test coverage.
+
+
+Nice-to-Haves:
+
+Experience with Kubernetes and container orchestration.
+Familiarity with CI/CD tools (e.g., Azure DevOps, GitHub Actions, Jenkins).
+Exposure to cloud platforms like Azure or AWS.
+Understanding microservices architecture.
+Knowledge of Server-Side React or Node.js for prototyping purposes
+Experience with GitHub Copilot.
+Show more Show less
+
