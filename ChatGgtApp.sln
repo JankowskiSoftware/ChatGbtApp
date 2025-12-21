@@ -2,9 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGbtApp.Repository", "ChatGbtApp.Repository\ChatGbtApp.Repository.csproj", "{9F75EEB3-0309-4D3D-8821-980081A3CB7A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGgtApp.Crawler", "..\ChatGbtApp.Crawler\ChatGgtApp.Crawler\ChatGgtApp.Crawler.csproj", "{2B66CF91-B90E-437B-9AB5-4343064C5700}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGbtApp", "ChatGbtApp\ChatGbtApp.csproj", "{A7F69624-0F42-41CC-81B8-621C14198B66}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGgtApp.Crawler", "ChatGbtApp.Crawler\ChatGgtApp.Crawler.csproj", "{5FF8741D-1D6B-4BB0-9C98-02770F88BAB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -16,13 +16,13 @@ Global
 		{9F75EEB3-0309-4D3D-8821-980081A3CB7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F75EEB3-0309-4D3D-8821-980081A3CB7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F75EEB3-0309-4D3D-8821-980081A3CB7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FF8741D-1D6B-4BB0-9C98-02770F88BAB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FF8741D-1D6B-4BB0-9C98-02770F88BAB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FF8741D-1D6B-4BB0-9C98-02770F88BAB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FF8741D-1D6B-4BB0-9C98-02770F88BAB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

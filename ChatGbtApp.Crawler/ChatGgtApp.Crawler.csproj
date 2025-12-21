@@ -8,17 +8,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Betalgo.Ranul.OpenAI" Version="9.2.6" />
       <PackageReference Include="Microsoft.Playwright" Version="1.57.0" />
-      <PackageReference Include="OpenAI" Version="2.8.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\ChatGbtApp.Repository\ChatGbtApp.Repository.csproj" />
+      <ProjectReference Include="..\ChatGbtApp\ChatGbtApp.csproj" />
     </ItemGroup>
 
 </Project>
