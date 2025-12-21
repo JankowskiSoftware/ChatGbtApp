@@ -1,4 +1,4 @@
-﻿namespace ChatGgtApp.obj;
+﻿namespace ChatGgtApp;
 
 using ChatGgtApp;
 using System;

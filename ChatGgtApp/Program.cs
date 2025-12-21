@@ -1,7 +1,6 @@
 ﻿
 using System;
 using ChatGgtApp;
-using ChatGgtApp.obj;
 
 
 // await TerminalAgent.StartAsync();
