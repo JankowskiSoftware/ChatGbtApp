@@ -9,15 +9,17 @@ public class Job
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required] public DateTime DateTime { get; set; }
+    public DateTime DateTime { get; set; }
 
-    [Required] [StringLength(255)] public string Title { get; set; } = string.Empty;
+    public string? Title { get; set; }
 
-    [Required] [StringLength(255)] public string Company { get; set; } = string.Empty;
+    public string? Company { get; set; }
 
-    [Required] [StringLength(255)] public string JobUrl { get; set; } = string.Empty;
+    public int Score { get; set; }
 
-    public int? Score { get; set; }
+    public string? FileLocation { get; set; }
 
-    [Column(TypeName = "nvarchar(max)")] public string JobDescription { get; set; } = string.Empty;
+    public string? Hash { get; set; }
+
+    public string? JobDescription { get; set; }
 }

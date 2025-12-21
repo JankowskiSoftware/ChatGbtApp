@@ -15,13 +15,15 @@ namespace ChatGbtApp.Repository.Migrations
                 name: "Jobs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Company = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Score = table.Column<int>(type: "int", nullable: true),
-                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Company = table.Column<string>(type: "TEXT", nullable: true),
+                    Score = table.Column<int>(type: "INTEGER", nullable: false),
+                    FileLocation = table.Column<string>(type: "TEXT", nullable: true),
+                    Hash = table.Column<string>(type: "TEXT", nullable: true),
+                    JobDescription = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

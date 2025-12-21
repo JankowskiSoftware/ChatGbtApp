@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace ChatGgtApp;
+namespace ChatGbtApp;
 
 public class TerminalAgent
 {

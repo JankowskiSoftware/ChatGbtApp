@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.Json;
 
-namespace ChatGgtApp;
+namespace ChatGbtApp;
 
 using Environment = Environment;
 

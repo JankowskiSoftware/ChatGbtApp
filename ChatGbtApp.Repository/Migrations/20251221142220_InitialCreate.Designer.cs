@@ -3,7 +3,6 @@ using System;
 using ChatGbtApp.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -12,46 +11,41 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatGbtApp.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251221104634_InitialCreate")]
+    [Migration("20251221142220_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.1");
 
             modelBuilder.Entity("ChatGbtApp.Repository.Job", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Company")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FileLocation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Hash")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("JobDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("TEXT");
 
-                    b.Property<int?>("Score")
-                        .HasColumnType("int");
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
