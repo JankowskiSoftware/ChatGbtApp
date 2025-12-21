@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGbtApp.Repository", "Ch
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGgtApp.Crawler", "..\ChatGbtApp.Crawler\ChatGgtApp.Crawler\ChatGgtApp.Crawler.csproj", "{2B66CF91-B90E-437B-9AB5-4343064C5700}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGgtApp.Evluatior", "ChatGgtApp.Evluatior\ChatGgtApp.Evluatior.csproj", "{74BBCE6B-F990-408A-A6A2-C7F0B488734D}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatGbtApp", "ChatGbtApp\ChatGbtApp.csproj", "{A7F69624-0F42-41CC-81B8-621C14198B66}"
 EndProject
 Global
@@ -22,10 +20,6 @@ Global
 		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B66CF91-B90E-437B-9AB5-4343064C5700}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74BBCE6B-F990-408A-A6A2-C7F0B488734D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74BBCE6B-F990-408A-A6A2-C7F0B488734D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74BBCE6B-F990-408A-A6A2-C7F0B488734D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74BBCE6B-F990-408A-A6A2-C7F0B488734D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A7F69624-0F42-41CC-81B8-621C14198B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
