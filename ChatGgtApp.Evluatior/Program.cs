@@ -1,8 +1,4 @@
 ﻿
-using System;
-using ChatGgtApp;
-using ChatGbtApp.Repository;
-using Microsoft.EntityFrameworkCore;
 
 // Initialize database
 using (var context = new AppDbContextFactory().CreateDbContext(null))

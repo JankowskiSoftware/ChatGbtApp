@@ -1,11 +1,6 @@
-﻿namespace ChatGgtApp;
+﻿using System.Diagnostics;
 
-using ChatGgtApp;
-using System;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using System.IO;
+namespace ChatGgtApp;
 
 public class TerminalAgent
 {
