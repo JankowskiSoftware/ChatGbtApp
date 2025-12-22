@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 
-public sealed record ParsedJobFit(
-    string? Company,
-    string? JobTitle,
-    int? MatchScore,                 // normalized to 0..10 (nullable if not parseable)
-    string? SeniorityFit,            // "low" | "medium" | "high" (nullable if invalid)
-    IReadOnlyList<string> MissingSkills,
-    IReadOnlyList<string> MissingAtsKeywoards, // NOTE: key name matches your prompt typo
-    IReadOnlyList<string> Strengths,
-    string? Recommendation
-);
+namespace ChatGgtApp.Crawler;
+
+public sealed class ParsedJobFit
+{
+    public string? Company { get; set; }
+    public string? JobTitle { get; set; }
+    public int? MatchScore { get; set; }    // normalized to 0..10 (nullable if not parseable)
+    public string? SeniorityFit { get; set; }   // "low", "medium", "high" (nullable if not parseable)
+    public IReadOnlyList<string> MissingSkills { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<string> MissingAtsKeywoards { get; set; } = Array.Empty<string>(); // NOTE: key name matches your prompt typo
+    public IReadOnlyList<string> Strengths { get; set; } = Array.Empty<string>();
+    public string? Recommendation { get; set; }
+}
 
 public class GptKeyValueParser
 {
@@ -76,16 +76,17 @@ public class GptKeyValueParser
 
             var recommendation = GetNullIfEmpty(kv, "recommendation");
 
-            return new ParsedJobFit(
-                Company: company,
-                JobTitle: jobTitle,
-                MatchScore: matchScore,
-                SeniorityFit: seniority,
-                MissingSkills: missingSkills,
-                MissingAtsKeywoards: missingAts,
-                Strengths: strengths,
-                Recommendation: recommendation
-            );
+            return new ParsedJobFit
+            {
+                Company = company,
+                JobTitle = jobTitle,
+                MatchScore = matchScore,
+                SeniorityFit = seniority,
+                MissingSkills = missingSkills,
+                MissingAtsKeywoards = missingAts,
+                Strengths = strengths,
+                Recommendation = recommendation
+            };
         }
         catch
         {

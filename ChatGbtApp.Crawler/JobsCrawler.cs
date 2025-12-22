@@ -25,7 +25,7 @@ public class JobsCrawler
         _logger = logger;
         _gptKeyValueParser = gptKeyValueParser;
 
-        var solutionRoot = SolutionDirectory.FindRepoRoot(Directory.GetCurrentDirectory());
+        var solutionRoot = SolutionDirectory.FindRepoRoot();
         var promptTemplate = File.ReadAllText(Path.Combine(solutionRoot, "data/prompt.txt"));
         var cv = File.ReadAllText(Path.Combine(solutionRoot, "data/cv.txt"));
 
@@ -35,16 +35,14 @@ public class JobsCrawler
 
     public async Task CrawlJobs(string urls)
     {
-        int i = 0;
-
         var links = urls.Split(',', StringSplitOptions.RemoveEmptyEntries);
         foreach (var url in links)
         {
-            _logger.LogInformation($"{i}: Downloading {url}");
+            _logger.LogInformation($"{url}: Downloading {url}");
             
-            var result = await _chromium.FetchAsync(url);
+            var jobPage = await _chromium.FetchAsync(url);
 
-            if (result.IsLoggedOut)
+            if (jobPage.IsLoggedOut)
             {
                 // 1) Run your manual login bootstrap (or show message to user)
                 var email = Environment.GetEnvironmentVariable("LOOP_EMAIL");
@@ -52,28 +50,28 @@ public class JobsCrawler
                 await _chromium.BootstrapLoginAsync(email, pass); // logs in and updates auth.json
 
                 // 2) Retry once
-                result = await _chromium.FetchAsync(url);
+                jobPage = await _chromium.FetchAsync(url);
 
-                if (result.IsLoggedOut)
+                if (jobPage.IsLoggedOut)
                     throw new Exception("Still logged out after login bootstrap.");
             }
-            
 
-            Console.WriteLine(result.Content);
+            var jobDescription = jobPage.Content ?? string.Empty;
+            
             // return;
-            _logger.LogInformation($"{i}: Asking ChatGBT {url}");
-            var input = _prompt.Replace("{{JOB DESCROPTION}}", result.Content ?? string.Empty);
+            _logger.LogInformation($"{url}: Asking ChatGBT {url}");
+            var input = _prompt.Replace("{{JOB DESCROPTION}}", jobDescription);
             var message = await _openAiApi.AskAsync(input);
 
             var values= _gptKeyValueParser.ParseOrNull(message);
-            if (values != null)
+            if (values == null)
             {
-                _logger.LogError($"{i}: values are null for message {message}");
+                _logger.LogError($"{url}: values are null for message {message}");
                 continue;
             }
 
-            _logger.LogInformation($"{i}: Storing result {url}");
-            await _jobStorage.Store(url, message);
+            _logger.LogInformation($"{url}: Storing result {url}");
+            await _jobStorage.Store(url, jobDescription, message, values);
         }
     }
 }

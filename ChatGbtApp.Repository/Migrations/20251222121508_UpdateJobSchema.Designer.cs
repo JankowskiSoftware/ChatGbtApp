@@ -3,6 +3,7 @@ using System;
 using ChatGbtApp.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatGbtApp.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251222121508_UpdateJobSchema")]
+    partial class UpdateJobSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.1");
@@ -24,14 +27,14 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Company")
-                        .HasMaxLength(100)
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Hash")
-                        .HasMaxLength(100)
+                        .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobDescription")
@@ -39,7 +42,7 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobTitle")
-                        .HasMaxLength(100)
+                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("MatchScore")
@@ -50,12 +53,10 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MissingAtsKeywoards")
-                        .HasMaxLength(1000)
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MissingSkills")
-                        .HasMaxLength(1000)
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -68,7 +69,6 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Strengths")
-                        .HasMaxLength(1000)
                         .IsRequired()
                         .HasColumnType("TEXT");
 

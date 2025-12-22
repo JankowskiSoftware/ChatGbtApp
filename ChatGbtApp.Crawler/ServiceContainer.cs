@@ -1,3 +1,4 @@
+using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,7 +36,9 @@ public static class ServiceContainer
             )
         );
         services.AddSingleton<GptKeyValueParser>();
-
+        _provider = services.BuildServiceProvider();
+        
+        services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
         _provider = services.BuildServiceProvider();
     }
 
@@ -53,5 +56,15 @@ public static class ServiceContainer
             throw new InvalidOperationException("ServiceContainer not configured. Call Configure() first.");
 
         return _provider.GetRequiredService(type);
+    }
+    
+    private static IMapper CreateMapper(ILoggerFactory loggerFactory){
+        var config = new MapperConfiguration(cfg =>
+        {
+            cfg.CreateMap<JobBase, Job>();
+            cfg.CreateMap<ParsedJobFit, Job>();
+        }, loggerFactory);
+
+        return config.CreateMapper();
     }
 }

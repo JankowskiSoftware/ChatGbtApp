@@ -1,41 +1,63 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using AutoMapper;
+using ChatGbtApp;
 using ChatGbtApp.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ChatGgtApp.Crawler;
 
-public class JobStorage(AppDbContext dbContext,  ILogger<Chromium> logger)
+public class JobStorage
 {
-    public async Task Store(string url, string message)
+    private readonly AppDbContext _dbContext;
+    private readonly ILogger<Chromium> _logger;
+    private readonly string _resultsDir;
+    private readonly IMapper _mapper;
+
+    public JobStorage(AppDbContext dbContext,  IMapper mapper, ILogger<Chromium> logger)
+    {
+        _dbContext = dbContext;
+        _mapper = mapper;
+        _logger = logger;
+
+        _resultsDir = Path.Combine("results", SolutionDirectory.FindRepoRoot());
+    }
+
+
+    public async Task Store(string url, string jobDescription, string message, ParsedJobFit values)
     {
         var hash = ComputeHash(message);
 
         if (string.IsNullOrWhiteSpace(hash))
         {
-            logger.LogError($"Empty content for {url}; skipping store.");
+            _logger.LogError($"{url}: Empty content for {url}; skipping store.");
             return;
         }
 
-        if (await dbContext.Jobs.AnyAsync(j => j.Hash == hash))
-        {
-            logger.LogDebug($"Duplicate content detected for {url}; already stored.");
-            return;
-        }
+        if (await _dbContext.Jobs.AnyAsync(j => j.Hash == hash))
+            if (await _dbContext.Jobs.AnyAsync(j => j.JobDescription == jobDescription))
+            {
+                _logger.LogDebug($"{url}: Duplicate content detected for {url}; already stored.");
+                return;
+            }
 
-        dbContext.Add(new Job
+        var baseJob = new JobBase
         {
+            Url = url,
             DateTime = DateTime.Now,
-            Title = "Title",
-            Company = "Company",
-            Score = 3,
-            FileLocation = url,
+            JobDescription = jobDescription,
             Hash = hash,
-            JobDescription = message
-        });
+            Message = message,
+        };
+        
+        var job = _mapper.Map<Job>(baseJob);
+        job = _mapper.Map<Job>(values);
 
-        await dbContext.SaveChangesAsync();
+    
+        _dbContext.Add(job);
+
+        await _dbContext.SaveChangesAsync();
     }
     
     

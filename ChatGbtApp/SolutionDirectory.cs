@@ -2,9 +2,9 @@
 
 public static class SolutionDirectory
 {
-    public static string FindRepoRoot(string startDir)
+    public static string FindRepoRoot()
     {
-        var dir = new DirectoryInfo(startDir);
+        var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
         while (dir != null)
         {
             if (Directory.Exists(Path.Combine(dir.FullName, ".git")) ||
