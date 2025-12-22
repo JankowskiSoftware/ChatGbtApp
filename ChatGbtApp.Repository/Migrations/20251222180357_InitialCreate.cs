@@ -15,24 +15,28 @@ namespace ChatGbtApp.Repository.Migrations
                 name: "Jobs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Url = table.Column<string>(type: "TEXT", nullable: false),
                     DateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Hash = table.Column<string>(type: "TEXT", nullable: true),
-                    JobDescription = table.Column<string>(type: "TEXT", nullable: true),
-                    Message = table.Column<string>(type: "TEXT", nullable: true),
                     Company = table.Column<string>(type: "TEXT", nullable: true),
                     JobTitle = table.Column<string>(type: "TEXT", nullable: true),
                     MatchScore = table.Column<int>(type: "INTEGER", nullable: true),
+                    Remote = table.Column<string>(type: "TEXT", nullable: true),
+                    Frontend = table.Column<string>(type: "TEXT", nullable: true),
+                    DotNetRole = table.Column<string>(type: "TEXT", nullable: true),
                     SeniorityFit = table.Column<string>(type: "TEXT", nullable: true),
+                    Summary = table.Column<string>(type: "TEXT", nullable: true),
+                    Recommendation = table.Column<string>(type: "TEXT", nullable: true),
                     MissingSkills = table.Column<string>(type: "TEXT", nullable: false),
                     MissingAtsKeywoards = table.Column<string>(type: "TEXT", nullable: false),
                     Strengths = table.Column<string>(type: "TEXT", nullable: false),
-                    Recommendation = table.Column<string>(type: "TEXT", nullable: true)
+                    JobDescription = table.Column<string>(type: "TEXT", nullable: true),
+                    Message = table.Column<string>(type: "TEXT", nullable: true),
+                    Marked = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Applied = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Jobs", x => x.Id);
+                    table.PrimaryKey("PK_Jobs", x => x.Url);
                 });
         }
 

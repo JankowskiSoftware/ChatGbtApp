@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatGbtApp.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251222160633_InitialCreate")]
+    [Migration("20251222180357_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -22,8 +22,10 @@ namespace ChatGbtApp.Repository.Migrations
 
             modelBuilder.Entity("ChatGbtApp.Repository.Job", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Url")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Applied")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Company")
@@ -32,7 +34,10 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Hash")
+                    b.Property<string>("DotNetRole")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Frontend")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobDescription")
@@ -40,6 +45,9 @@ namespace ChatGbtApp.Repository.Migrations
 
                     b.Property<string>("JobTitle")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Marked")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("MatchScore")
                         .HasColumnType("INTEGER");
@@ -58,6 +66,9 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("Recommendation")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Remote")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SeniorityFit")
                         .HasColumnType("TEXT");
 
@@ -65,7 +76,10 @@ namespace ChatGbtApp.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Summary")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Url");
 
                     b.ToTable("Jobs");
                 });
