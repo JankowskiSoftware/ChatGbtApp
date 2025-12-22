@@ -36,8 +36,9 @@ public static class ServiceContainer
             )
         );
         services.AddSingleton<GptKeyValueParser>();
-        _provider = services.BuildServiceProvider();
+        services.AddSingleton<JobProcessingProgress>();
         
+        _provider = services.BuildServiceProvider();
         services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
         _provider = services.BuildServiceProvider();
     }

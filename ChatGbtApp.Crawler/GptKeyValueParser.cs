@@ -12,6 +12,10 @@ public sealed class ParsedJobFit
     public IReadOnlyList<string> MissingAtsKeywoards { get; set; } = Array.Empty<string>(); // NOTE: key name matches your prompt typo
     public IReadOnlyList<string> Strengths { get; set; } = Array.Empty<string>();
     public string? Recommendation { get; set; }
+    public string? Remote { get; set; }
+    public string? Summary { get; set; }
+    public string? Frontend { get; set; }
+    public string? DotNetRole { get; set; }
 }
 
 public class GptKeyValueParser
@@ -30,7 +34,11 @@ public class GptKeyValueParser
             ["missingSkills"] = "missingSkills",
             ["missingAtsKeywoards"] = "missingAtsKeywoards", // keep exact spelling
             ["strengths"] = "strengths",
-            ["recommendation"] = "recommendation"
+            ["recommendation"] = "recommendation",
+            ["remote"] = "remote",
+            ["summary"] = "summary",
+            ["frontend"] = "frontend",
+            ["dotNetRole"] = "dotNetRole"
         };
 
     private readonly HashSet<string> AllowedSeniority =
@@ -75,6 +83,10 @@ public class GptKeyValueParser
             var strengths = ParseCsvList(GetNullIfEmpty(kv, "strengths"));
 
             var recommendation = GetNullIfEmpty(kv, "recommendation");
+            var summary = GetNullIfEmpty(kv, "summary");
+            var remote = GetNullIfEmpty(kv, "remote");
+            var dotNetRole = GetNullIfEmpty(kv, "dotNetRole");
+            var frontend = GetNullIfEmpty(kv, "frontend");
 
             return new ParsedJobFit
             {
@@ -85,7 +97,11 @@ public class GptKeyValueParser
                 MissingSkills = missingSkills,
                 MissingAtsKeywoards = missingAts,
                 Strengths = strengths,
-                Recommendation = recommendation
+                Recommendation = recommendation,
+                Remote = remote,
+                Summary = summary,
+                DotNetRole = dotNetRole,
+                Frontend = frontend
             };
         }
         catch

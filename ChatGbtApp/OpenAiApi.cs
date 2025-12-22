@@ -13,6 +13,7 @@ public class OpenAiApi
     public async Task<string> AskAsync(string input, string model = "gpt-5.2")
     {
         using var http = new HttpClient();
+        http.Timeout = TimeSpan.FromMinutes(3);
         http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", API_KEY);
 
         var payload = new { model, input };

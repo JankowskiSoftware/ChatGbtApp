@@ -9,7 +9,7 @@ Follow these rules strictly:
    - Start with exactly: <<<RESULTS>>>
    - End with exactly: <<<END>>>
    - Contain ONLY simple key=value pairs
-   - Contain EXACTLY 8 keys
+   - Contain EXACTLY 10 keys
    - Use one key=value pair per line
    - NOT contain any extra text, comments, or formatting
 3. If you cannot follow this format exactly, respond with: FORMAT_ERROR
@@ -68,6 +68,25 @@ recommendation:
 - Short, actionable sentence
 - Examples: "Apply", "Apply with reservations", "Upskill before applying"
 - Base this on matchScore and seniorityFit
+
+remote:
+- One of: yes, maybe, no
+- is this likelly that I will be able to work remotely for this position from poland
+- yes = very likelly
+- maybe = there is a Chance for remote work from poland
+- no = most likelly there is no Chance for remote work from poland
+
+summary: 
+- one sentence summary that I will know what action should I take.
+
+dotNetRole:
+- One of yes, no
+- one if you are sure this is mainly .net backend role
+- no if its pyton, java or other stacks other then .net developer
+
+frontend:
+- values from 1-3 describeing how frontend havy the role is
+
 
 OUTPUT:
 Return a short explanation first, then the results block.
