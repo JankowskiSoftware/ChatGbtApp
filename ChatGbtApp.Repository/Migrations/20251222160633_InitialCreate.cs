@@ -18,12 +18,17 @@ namespace ChatGbtApp.Repository.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     DateTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Company = table.Column<string>(type: "TEXT", nullable: true),
-                    Score = table.Column<int>(type: "INTEGER", nullable: false),
-                    FileLocation = table.Column<string>(type: "TEXT", nullable: true),
                     Hash = table.Column<string>(type: "TEXT", nullable: true),
-                    JobDescription = table.Column<string>(type: "TEXT", nullable: true)
+                    JobDescription = table.Column<string>(type: "TEXT", nullable: true),
+                    Message = table.Column<string>(type: "TEXT", nullable: true),
+                    Company = table.Column<string>(type: "TEXT", nullable: true),
+                    JobTitle = table.Column<string>(type: "TEXT", nullable: true),
+                    MatchScore = table.Column<int>(type: "INTEGER", nullable: true),
+                    SeniorityFit = table.Column<string>(type: "TEXT", nullable: true),
+                    MissingSkills = table.Column<string>(type: "TEXT", nullable: false),
+                    MissingAtsKeywoards = table.Column<string>(type: "TEXT", nullable: false),
+                    Strengths = table.Column<string>(type: "TEXT", nullable: false),
+                    Recommendation = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -24,4 +24,8 @@
       <ProjectReference Include="..\ChatGbtApp\ChatGbtApp.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>

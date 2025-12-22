@@ -10,6 +10,13 @@ namespace ChatGgtApp.Crawler;
 
 public class JobStorage
 {
+    public enum JobStorageStatus
+    {
+        Success,
+        Duplicate, 
+        EmptyJobDescription
+    }
+
     private readonly AppDbContext _dbContext;
     private readonly ILogger<Chromium> _logger;
     private readonly string _resultsDir;
@@ -25,21 +32,21 @@ public class JobStorage
     }
 
 
-    public async Task Store(string url, string jobDescription, string message, ParsedJobFit values)
+    public async Task<JobStorageStatus> Store(string url, string jobDescription, string message, ParsedJobFit values)
     {
         var hash = ComputeHash(message);
 
         if (string.IsNullOrWhiteSpace(hash))
         {
             _logger.LogError($"{url}: Empty content for {url}; skipping store.");
-            return;
+            return JobStorageStatus.EmptyJobDescription;
         }
 
         if (await _dbContext.Jobs.AnyAsync(j => j.Hash == hash))
             if (await _dbContext.Jobs.AnyAsync(j => j.JobDescription == jobDescription))
             {
                 _logger.LogDebug($"{url}: Duplicate content detected for {url}; already stored.");
-                return;
+                return JobStorageStatus.Duplicate;
             }
 
         var baseJob = new JobBase
@@ -58,6 +65,8 @@ public class JobStorage
         _dbContext.Add(job);
 
         await _dbContext.SaveChangesAsync();
+        
+        return JobStorageStatus.Success;
     }
     
     

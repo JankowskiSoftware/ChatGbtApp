@@ -24,51 +24,41 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Company")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Hash")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobDescription")
-                        .HasMaxLength(100000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobTitle")
-                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("MatchScore")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
-                        .HasMaxLength(10000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MissingAtsKeywoards")
-                        .HasMaxLength(1000)
+                    b.PrimitiveCollection<string>("MissingAtsKeywoards")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MissingSkills")
-                        .HasMaxLength(1000)
+                    b.PrimitiveCollection<string>("MissingSkills")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Recommendation")
-                        .HasMaxLength(5000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SeniorityFit")
-                        .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Strengths")
-                        .HasMaxLength(1000)
+                    b.PrimitiveCollection<string>("Strengths")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

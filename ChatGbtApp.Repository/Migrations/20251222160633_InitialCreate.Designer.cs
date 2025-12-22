@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatGbtApp.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251222121508_UpdateJobSchema")]
-    partial class UpdateJobSchema
+    [Migration("20251222160633_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,48 +27,41 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Company")
-                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Hash")
-                        .HasMaxLength(64)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobDescription")
-                        .HasMaxLength(100000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("JobTitle")
-                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("MatchScore")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
-                        .HasMaxLength(10000)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MissingAtsKeywoards")
+                    b.PrimitiveCollection<string>("MissingAtsKeywoards")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MissingSkills")
+                    b.PrimitiveCollection<string>("MissingSkills")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Recommendation")
-                        .HasMaxLength(5000)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SeniorityFit")
-                        .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Strengths")
+                    b.PrimitiveCollection<string>("Strengths")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
