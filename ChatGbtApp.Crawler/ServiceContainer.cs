@@ -1,7 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
+using ChatGbtApp;
 using ChatGbtApp.Repository;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace ChatGbtApp;
+namespace ChatGgtApp.Crawler;
 
 public static class ServiceContainer
 {
@@ -12,9 +14,27 @@ public static class ServiceContainer
         var services = new ServiceCollection();
 
         // Register services
-        services.AddScoped<AppDbContext>();
+        services.AddLogging(builder =>
+        {
+            builder.AddSimpleConsole(options =>
+            {
+                options.SingleLine = true;
+                options.TimestampFormat = "HH:mm:ss ";
+            });
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+        services.AddSingleton<AppDbContext>();
         services.AddSingleton<OpenAiApi>();
         services.AddSingleton<TerminalAgent>();
+        services.AddSingleton<JobsCrawler>();
+        services.AddSingleton<JobStorage>();
+        services.AddSingleton<Chromium>(provider =>
+            new Chromium(
+                "https://app.loopcv.pro/login",
+                provider.GetRequiredService<ILogger<Chromium>>()
+            )
+        );
+        services.AddSingleton<GptKeyValueParser>();
 
         _provider = services.BuildServiceProvider();
     }

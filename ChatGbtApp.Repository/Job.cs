@@ -15,7 +15,7 @@ public class Job
 
     public string? Company { get; set; }
 
-    public int Score { get; set; }
+    public int? Score { get; set; }
 
     public string? FileLocation { get; set; }
 

@@ -9,8 +9,8 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // Use solution root relative path
-        var solutionRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..", "..", "..", "..");
+        var solutionRoot = SolutionDirectory.FindRepoRoot(Directory.GetCurrentDirectory());
+        
         var dataDirectory = Path.Combine(solutionRoot, "data");
         Directory.CreateDirectory(dataDirectory); // Ensure directory exists
         var dbPath = Path.Combine(dataDirectory, "jobs.db");

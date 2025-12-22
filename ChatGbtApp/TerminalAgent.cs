@@ -60,8 +60,7 @@ public class TerminalAgent
 
             return (cts, task, stopwatch);
         }
-
-
+        
         Console.WriteLine(response);
     }
 }
