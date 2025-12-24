@@ -13,11 +13,15 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
 
     public async Task<bool> IsDuplicate(string url)
     {
-        if (await dbContext.Jobs.AnyAsync(j => j.Url == url))
+        lock (this)
         {
-            logger.LogInformation($"[{url}] Duplicate detected; URL already in database.");
-            progress.RecordDuplicate();
-            return true;
+            var alreadyProcessed = dbContext.Jobs.Any(j => j.Url == url);
+            if (alreadyProcessed)
+            {
+                logger.LogInformation($"[{url}] Duplicate detected; URL already in database.");
+                progress.RecordDuplicate();
+                return true;
+            } 
         }
         
         return false;
@@ -35,9 +39,13 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
         
         var job = mapper.Map<Job>(baseJob);
         mapper.Map(values, job);
-        
-        dbContext.Add(job);
-        await dbContext.SaveChangesAsync();
+
+        lock (this)
+        {
+            dbContext.Add(job);
+            dbContext.SaveChanges();
+        }
+
         
         progress.RecordSuccess();
         logger.LogInformation($"[{url}] Successfully stored job listing.");

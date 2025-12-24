@@ -35,6 +35,8 @@ public class Job
     public string? JobDescription { get; set; }
     public string? Message { get; set; }
 
+    
+    public bool Rejected { get; set; } = false;
     public bool Marked { get; set; } = false;
     public bool Applied { get; set; } = false;
 }

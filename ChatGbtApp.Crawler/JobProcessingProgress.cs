@@ -58,12 +58,12 @@ public class JobProcessingProgress
         var divider = new string('═', 70);
         
         _logger.LogInformation($"\n{divider}");
-        _logger.LogInformation($"  📊 CRAWL SUMMARY");
+        _logger.LogInformation($"    CRAWL SUMMARY");
         _logger.LogInformation($"{divider}");
         _logger.LogInformation($"  Total Processed:    {_totalProcessed}");
-        _logger.LogInformation($"  ✓ Successfully Stored: {_successCount} ({successRate:F1}%)");
-        _logger.LogInformation($"  ✗ Duplicates:       {_duplicateCount}");
-        _logger.LogInformation($"  ⊘ Empty Pages:      {_emptyCount}");
+        _logger.LogInformation($"    Successfully Stored: {_successCount} ({successRate:F1}%)");
+        _logger.LogInformation($"    Duplicates:       {_duplicateCount}");
+        _logger.LogInformation($"    Empty Pages:      {_emptyCount}");
         _logger.LogInformation($"{divider}\n");
     }
 }

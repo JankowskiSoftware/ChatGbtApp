@@ -10,7 +10,7 @@ public class OpenAiApi
 {
     private readonly string API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
 
-    public async Task<string> AskAsync(string input, string model = "gpt-5.2")
+    public async Task<string> AskAsync(string input, string model = "gpt-4.1-mini") // "gpt-5.2")
     {
         using var http = new HttpClient();
         http.Timeout = TimeSpan.FromMinutes(3);

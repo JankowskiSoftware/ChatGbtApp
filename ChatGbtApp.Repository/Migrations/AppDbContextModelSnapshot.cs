@@ -63,6 +63,9 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("Recommendation")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("Rejected")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Remote")
                         .HasColumnType("TEXT");
 

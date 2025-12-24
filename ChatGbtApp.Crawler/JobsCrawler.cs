@@ -36,66 +36,71 @@ public class JobsCrawler
         var links = urls.Split(',', StringSplitOptions.RemoveEmptyEntries);
         _progress.Reset(links.Length);
         
-        foreach (var url in links)
-        {
-            try
+        //foreach (var url in links)
+        await Parallel.ForEachAsync(
+            links,
+            new ParallelOptions { MaxDegreeOfParallelism = 4 },
+            async (url, ct) =>
             {
-                if (await _jobStorage.IsDuplicate(url))
+                try
                 {
-                    _progress.LogProgress();
-                    continue;
-                }
-                
-                _logger.LogInformation($"[{url}] Starting job processing...");
-            
-                var jobPage = await _chromium.FetchAsync(url);
+                    if (await _jobStorage.IsDuplicate(url))
+                    {
+                        _progress.LogProgress();
+                        return;
+                    }
 
-                if (jobPage.IsLoggedOut)
-                {
-                    // 1) Run your manual login bootstrap (or show message to user)
-                    var email = Environment.GetEnvironmentVariable("LOOP_EMAIL");
-                    var pass = Environment.GetEnvironmentVariable("LOOP_PASS");
-                    await _chromium.BootstrapLoginAsync(email, pass); // logs in and updates auth.json
+                    _logger.LogInformation($"[{url}] Starting job processing...");
 
-                    // 2) Retry once
-                    jobPage = await _chromium.FetchAsync(url);
+                    var jobPage = await _chromium.FetchAsync(url);
 
                     if (jobPage.IsLoggedOut)
-                        throw new Exception("Still logged out after login bootstrap.");
-                }
+                    {
+                        // 1) Run your manual login bootstrap (or show message to user)
+                        var email = Environment.GetEnvironmentVariable("LOOP_EMAIL");
+                        var pass = Environment.GetEnvironmentVariable("LOOP_PASS");
+                        await _chromium.BootstrapLoginAsync(email, pass); // logs in and updates auth.json
 
-                var jobDescription = jobPage.Content ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(jobDescription))
+                        // 2) Retry once
+                        jobPage = await _chromium.FetchAsync(url);
+
+                        if (jobPage.IsLoggedOut)
+                            throw new Exception("Still logged out after login bootstrap.");
+                    }
+
+                    var jobDescription = jobPage.Content ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(jobDescription))
+                    {
+                        _progress.RecordEmpty();
+                        _logger.LogWarning($"[{url}] Empty content detected; skipping store.");
+                        return;
+                    }
+
+                    _logger.LogInformation($"[{url}] Requesting analysis from ChatGPT...");
+                    var input = _prompt.Replace("{{JOB DESCROPTION}}", jobDescription);
+                    var message = await _openAiApi.AskAsync(input);
+
+                    var values = _gptKeyValueParser.ParseOrNull(message);
+                    if (values == null)
+                    {
+                        _logger.LogError($"[{url}] Failed to parse ChatGPT response; skipping.");
+                        return;
+                    }
+
+                    _logger.LogInformation($"[{url}] Storing parsed results...");
+                    await _jobStorage.Store(url, jobDescription, message, values);
+
+                    _logger.LogInformation(
+                        $"[{url}] ChatGBT MatchScore: [{values.MatchScore}], Remote: {values.Remote} Summary: {values.Summary}");
+
+                    _progress.LogProgress();
+                }
+                catch (Exception e)
                 {
-                    _progress.RecordEmpty();
-                    _logger.LogWarning($"[{url}] Empty content detected; skipping store.");
-                    continue;
+                    _logger.LogCritical($"[{url}] Error processing: {e.Message}");
+                    Console.WriteLine(e);
                 }
-
-                _logger.LogInformation($"[{url}] Requesting analysis from ChatGPT...");
-                var input = _prompt.Replace("{{JOB DESCROPTION}}", jobDescription);
-                var message = await _openAiApi.AskAsync(input);
-
-                var values= _gptKeyValueParser.ParseOrNull(message);
-                if (values == null)
-                {
-                    _logger.LogError($"[{url}] Failed to parse ChatGPT response; skipping.");
-                    continue;
-                }
-
-                _logger.LogInformation($"[{url}] Storing parsed results...");
-                await _jobStorage.Store(url, jobDescription, message, values);
-                
-                _logger.LogInformation($"[{url}] ChatGBT MatchScore: [{values.MatchScore}], Remote: {values.Remote} Summary: {values.Summary}");
-                
-                _progress.LogProgress();
-            }
-            catch (Exception e)
-            {
-                _logger.LogCritical($"[{url}] Error processing: {e.Message}");
-                Console.WriteLine(e);
-            }
-        }
+            });
         _progress.PrintSummary();
     }
 }
