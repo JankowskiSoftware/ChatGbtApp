@@ -1,58 +1,45 @@
-What is not fitting me well.
-- I am not full stack developer. I have only created 10 pages in html, css, JavaScript 10 years ago.
+Michal Jankowski — Senior .NET Backend Engineer / Technical Lead
+Wroclaw, Poland | Remote/Hybrid
 
-Summary: You as a Candidate
-🔹 Strengths
+TARGET PROFILE
+Senior/Lead .NET backend engineer for large distributed systems (microservices, cloud/Kubernetes, scalability, reliability, observability, CI/CD). Not seeking full-stack roles.
 
-13+ years of software experience, strong in C#/.NET, WPF, and Xamarin
+SUMMARY
+13+ years of software engineering experience with strong ownership and technical leadership. Recent work includes cloud-native, production systems running on Kubernetes/OpenShift, building observability (dashboards/monitoring), troubleshooting complex distributed failures, and improving performance/reliability across multi-service environments. Strong focus on C#/.NET backend development, system design, and operational excellence.
 
-Recent experience with backend development, including .NET Core, microservices, Kubernetes, Azure, Kafka, and observability tooling (Grafana, Prometheus, Splunk)
+CORE TECHNOLOGIES (MATCH KEYWORDS)
+Primary: C#, .NET, .NET Core, ASP.NET Core
+Distributed systems: Microservices, System Design, Horizontal Scaling, Multi-tenant, High Availability, Fault Tolerance, gRPC, REST, CQRS, Centralized Configuration
+Cloud/containers: Azure, AKS (Azure Kubernetes Service), Kubernetes, OpenShift, Docker
+Observability: Prometheus, Grafana, New Relic, Splunk, Dashboards, Monitoring, Incident Response, Troubleshooting
+Messaging/streaming: Kafka, Azure Service Bus
+Data: MSSQL, SQL, T-SQL, PostgreSQL, Oracle SQL, Redis, MongoDB, Azure Blob Storage
+CI/CD & tooling: CI/CD, Git, Jenkins, uDeploy, GitHub Copilot, ChatGPT
+Engineering practices: TDD, DDD, BDD, Clean Code, SOLID, Unit Testing, Integration Testing, Mentoring, Technical Leadership
 
-Michał Jankowski
+EXPERIENCE HIGHLIGHTS (DISTRIBUTED .NET BACKEND)
+Relativity (Remote) — .NET Technical Lead (AI Systems) | Sep 2025 – Nov 2025
 
-Exposure to distributed systems at large-scale companies (Citi, Relativity)
+* Worked on a global-scale platform on a large Azure Kubernetes fleet; backend services in .NET
+* Built production observability (Prometheus/Grafana/New Relic), surfaced availability and latency issues
+* Investigated multi-layer distributed crashes across microservices and Kubernetes internals; narrowed root-cause domains
 
-Clear technical ownership and communication skills, including team mentoring, CI/CD, and clean architecture
+Citi / RE Partners (Remote) — Senior Software Developer | Jan 2023 – May 2025
 
-High adaptability — able to learn complex cloud/infra tools quickly under pressure
+* Built/operated a distributed platform of hundreds of microservices on Kubernetes/OpenShift
+* Implemented scalable stream/data processing with Kafka; improved reliability and data integrity checks
+* Platform troubleshooting and reliability work using Grafana/Prometheus/Splunk; improved environment stability and developer productivity
+* Optimized Redis performance and operational jobs to prevent data-limit failures and improve throughput
 
-🔹 Growth Areas / Weaknesses
+Earlier .NET delivery and leadership (selected)
 
-Backend experience is still relatively new (3 years),The rest is in WPF and Xamarin.
+* Verizon (Remote) — C#/.NET Core: architecture improvements, testing adoption, maintainability focus
+* Volvo (Wroclaw) — Lead Engineer: greenfield .NET solution, architecture, CI/CD, cross-functional delivery
+* The Money Shop UK (Nottingham) — .NET services + SQL: CI/CD adoption, mentoring, delivery optimization
+* Incom (Wroclaw) — SQL/T-SQL: TB-scale data processing and performance optimization
 
-History of anxiety and perfectionism in high-pressure environments — needs a role with clear expectations, supportive onboarding, and realistic pace
+MATCH ME WITH
+Senior/Lead Backend Engineer, .NET Backend Engineer, Microservices Engineer, Distributed Systems Engineer, Platform Engineer (backend), Cloud Backend Engineer, SRE-adjacent backend roles in C#/.NET, Kubernetes-based environments.
 
-Better suited to mid-senior backend roles, not high-end lead/principal/architect titles yet
-
-🔹 What Kind of Jobs You're Looking For
-
-Title: Senior or Mid-Senior .NET Backend Developer
-
-Tech: .NET Core, C#, microservices, Kubernetes, Azure, distributed systems
-
-Type: Remote from Poland. Courtiers with high salaries preferred within EU time zone.
-
-Contract: B2B or contract (also open to permanent)
-
-Salary goal: Minimum €8,000/month gross (or equivalent in USD/GBP)
-
-Culture fit: Modern, well-structured backend teams with realistic onboarding, clear scope, and tech challenges without chaos
-
-
-
-ALL of the skils: C#: .NET core, Xamarin, WPF, Entity Framework 
-
-Microservices: System Design, Horizontal Scaling, Workflow Orchestration, Netflix Conductor, Splunk, Grafana, Centralized Config, gRPC, REST 
-
-Infrastructure: Azure Kubernetes Service (AKS), Azure Virtual Machines, Kubernetes, OpenShift, Docker, CI/CD, uDeploy, Git 
-
-Data Bases: Azure Blob, Mongo DB, Redis, MSSQL, SQL, T-SQL, Oracle SQL 
-
-Messaging: Azure Service Bus, Kafka 
-
-Other: TDD, DDD, BDD, ChatGPT, GitHub Copilot 
-
-Soft Skills: interpersonal skills, Team leadership, cross-functional collaboration, mentoring, ownership, initiative, pragmatic, team spirit, empathy, conflict resolution, continuous learning, communication 
-
-Role related: asp.net, API, cloud computing, postgresql, B2B, S3 
-
+AVOID
+Full-stack roles and frontend-heavy roles (minimal UI only when needed).
