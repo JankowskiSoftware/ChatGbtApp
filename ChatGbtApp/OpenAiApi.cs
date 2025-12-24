@@ -1,75 +1,65 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using ChatGbtApp.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace ChatGbtApp;
 
-using Environment = Environment;
-
-public class OpenAiApi
+public class OpenAiApi : IOpenAiApi
 {
-    private readonly string API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+    private readonly HttpClient _httpClient;
+    private readonly IResponseParser _responseParser;
+    private readonly string _apiKey;
+    private readonly string _apiUrl;
+    private readonly ILogger? _logger;
 
-    public async Task<string> AskAsync(string input, string model = "gpt-4.1-mini") // "gpt-5.2")
+    public OpenAiApi(HttpClient httpClient, IResponseParser responseParser, ILogger<OpenAiApi> logger, string apiKey, string apiUrl = "https://api.openai.com/v1/responses")
     {
-        using var http = new HttpClient();
-        http.Timeout = TimeSpan.FromMinutes(3);
-        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", API_KEY);
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _responseParser = responseParser ?? throw new ArgumentNullException(nameof(responseParser));
+        _apiKey = apiKey ?? throw new ArgumentNullException(nameof(apiKey));
+        _apiUrl = apiUrl ?? throw new ArgumentNullException(nameof(apiUrl));
+        _logger = logger;
+        
+        _httpClient.Timeout = TimeSpan.FromMinutes(3);
+    }
 
-        var payload = new { model, input };
-        var json = JsonSerializer.Serialize(payload);
-        using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        using var resp = await http.PostAsync("https://api.openai.com/v1/responses", content);
+    public async Task<string> AskAsync(string input, string model = "gpt-4.1-mini")
+    {
+        var request = CreateRequest(input, model);
+        
+        using var resp = await _httpClient.SendAsync(request);
         resp.EnsureSuccessStatusCode();
         var respText = await resp.Content.ReadAsStringAsync();
 
-        // Parse the JSON response to extract plain text instead of returning escaped JSON.
         try
         {
             using var doc = JsonDocument.Parse(respText);
-            if (TryExtractText(doc.RootElement, out var parsedText))
+            if (_responseParser.TryExtractText(doc.RootElement, out var parsedText))
                 return parsedText;
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
-            // Fall through to return the raw response text if parsing fails.
+            _logger?.LogError("Failed to parse JSON response: {ResponseText}", respText);
+            _logger?.LogError("Failed to parse JSON response: {ex}", ex);
         }
 
         return respText;
     }
 
-    private static bool TryExtractText(JsonElement root, out string text)
+    private HttpRequestMessage CreateRequest(string input, string model)
     {
-        var sb = new StringBuilder();
-        if (root.TryGetProperty("output", out var output))
-            foreach (var outElem in output.EnumerateArray())
-            {
-                if (!outElem.TryGetProperty("content", out var contents))
-                    continue;
+        var payload = new { model, input };
+        var json = JsonSerializer.Serialize(payload);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                foreach (var cont in contents.EnumerateArray())
-                    if (cont.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
-                        sb.Append(t.GetString());
-                    else if (cont.TryGetProperty("content", out var inner))
-                        foreach (var innerItem in inner.EnumerateArray())
-                            if (innerItem.TryGetProperty("text", out var it) && it.ValueKind == JsonValueKind.String)
-                                sb.Append(it.GetString());
-            }
-
-        if (sb.Length > 0)
+        var request = new HttpRequestMessage(HttpMethod.Post, _apiUrl)
         {
-            text = sb.ToString();
-            return true;
-        }
+            Content = content
+        };
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
 
-        if (root.TryGetProperty("output_text", out var outText) && outText.ValueKind == JsonValueKind.String)
-        {
-            text = outText.GetString() ?? string.Empty;
-            return true;
-        }
-
-        text = string.Empty;
-        return false;
+        return request;
     }
 }

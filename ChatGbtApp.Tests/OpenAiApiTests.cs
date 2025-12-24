@@ -1,6 +1,8 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using ChatGbtApp.Interfaces;
+using ChatGbtApp.Services;
 using Moq;
 using Moq.Protected;
 
@@ -9,8 +11,6 @@ namespace ChatGbtApp.Tests;
 public class OpenAiApiTests
 {
     private const string TestApiKey = "test-api-key-12345";
-
-    public OpenAiApiTests() => Environment.SetEnvironmentVariable("OPENAI_API_KEY", TestApiKey);
 
     [Fact]
     public async Task AskAsync_WithValidResponse_ReturnsExtractedText()
@@ -206,11 +206,21 @@ public class OpenAiApiTests
     public async Task AskAsync_WithUnicodeCharacters_HandlesCorrectly() =>
         Assert.Equal("你好世界 🌍 Привет мир", await CreateApi(@"{""output_text"": ""你好世界 🌍 Привет мир""}").AskAsync("Hello 世界"));
 
-    private OpenAiApiTestable CreateApi(string response, HttpStatusCode status = HttpStatusCode.OK) =>
-        new(CreateMockHandler(response, status).Object);
+    private IOpenAiApi CreateApi(string response, HttpStatusCode status = HttpStatusCode.OK)
+    {
+        var handler = CreateMockHandler(response, status);
+        var httpClient = new HttpClient(handler.Object, false);
+        var parser = new OpenAiResponseParser();
+        return new OpenAiApi(httpClient, parser, null, TestApiKey);
+    }
 
-    private OpenAiApiTestable CreateApiWithCapture(string response, Action<string> capture) =>
-        new(CreateMockHandlerWithCapture(response, capture).Object);
+    private IOpenAiApi CreateApiWithCapture(string response, Action<string> capture)
+    {
+        var handler = CreateMockHandlerWithCapture(response, capture);
+        var httpClient = new HttpClient(handler.Object, false);
+        var parser = new OpenAiResponseParser();
+        return new OpenAiApi(httpClient, parser, null, TestApiKey);
+    }
 
     private Mock<HttpMessageHandler> CreateMockHandler(string response, HttpStatusCode status)
     {
@@ -248,64 +258,5 @@ public class OpenAiApiTests
                 };
             });
         return mockHandler;
-    }
-
-    private class OpenAiApiTestable : OpenAiApi
-    {
-        private readonly HttpMessageHandler _handler;
-        public OpenAiApiTestable(HttpMessageHandler handler) => _handler = handler;
-
-        public new async Task<string> AskAsync(string input, string model = "gpt-4.1-mini")
-        {
-            var API_KEY = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-            using var http = new HttpClient(_handler, false);
-            http.Timeout = TimeSpan.FromMinutes(3);
-            http.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", API_KEY);
-
-            var payload = new { model, input };
-            var json = JsonSerializer.Serialize(payload);
-            using var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            using var resp = await http.PostAsync("https://api.openai.com/v1/responses", content);
-            resp.EnsureSuccessStatusCode();
-            var respText = await resp.Content.ReadAsStringAsync();
-
-            try { using var doc = JsonDocument.Parse(respText); if (TryExtractTextPublic(doc.RootElement, out var t)) return t; } catch { }
-            return respText;
-        }
-
-        public bool TryExtractTextPublic(JsonElement root, out string text)
-        {
-            var sb = new StringBuilder();
-            if (root.TryGetProperty("output", out var output))
-                foreach (var outElem in output.EnumerateArray())
-                {
-                    if (!outElem.TryGetProperty("content", out var contents))
-                        continue;
-
-                    foreach (var cont in contents.EnumerateArray())
-                        if (cont.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
-                            sb.Append(t.GetString());
-                        else if (cont.TryGetProperty("content", out var inner))
-                            foreach (var innerItem in inner.EnumerateArray())
-                                if (innerItem.TryGetProperty("text", out var it) && it.ValueKind == JsonValueKind.String)
-                                    sb.Append(it.GetString());
-                }
-
-            if (sb.Length > 0)
-            {
-                text = sb.ToString();
-                return true;
-            }
-
-            if (root.TryGetProperty("output_text", out var outText) && outText.ValueKind == JsonValueKind.String)
-            {
-                text = outText.GetString() ?? string.Empty;
-                return true;
-            }
-
-            text = string.Empty;
-            return false;
-        }
     }
 }

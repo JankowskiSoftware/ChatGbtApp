@@ -26,7 +26,6 @@ public static class ServiceContainer
         });
         services.AddSingleton<AppDbContext>();
         services.AddSingleton<OpenAiApi>();
-        services.AddSingleton<TerminalAgent>();
         services.AddSingleton<JobsCrawler>();
         services.AddSingleton<JobStorage>();
         services.AddSingleton<Chromium>(provider =>
