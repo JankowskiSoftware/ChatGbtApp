@@ -19,7 +19,7 @@ public class JobsCrawler
         IJobProcessor jobProcessor,
         JobProcessingProgress progress,
         ILogger<JobsCrawler> logger,
-        int maxParallelism = 4)
+        int maxParallelism = 1)
     {
         _jobProcessor = jobProcessor;
         _progress = progress;

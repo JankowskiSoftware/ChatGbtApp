@@ -5,6 +5,7 @@ using ChatGbtApp.Interfaces;
 using ChatGbtApp.Services;
 using ChatGgtApp.Crawler.Browser;
 using ChatGgtApp.Crawler.Extractors;
+using ChatGgtApp.Crawler.Extractors.Loopcv;
 using ChatGgtApp.Crawler.Interfaces;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
@@ -43,28 +44,20 @@ public static class ServiceContainer
             provider.GetRequiredService<OpenAiApiFactory>().Create());
         services.AddSingleton<IJobProcessor, JobProcessor>();
         services.AddSingleton<JobsCrawler>();
+        services.AddSingleton<Chromium>();
         
-        
-        
+        // Loopcv login service
+        services.AddSingleton<LoopCvLogger>(provider =>
+            new LoopCvLogger(
+                provider.GetRequiredService<ILogger<LoopCvLogger>>(),
+                LoopcvConst.Email,
+                LoopcvConst.Password,
+                LoopcvConst.LoginUrl
+            )
+        );
         
         services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
         
-        // Register Chromium browser
-        services.AddSingleton<Chromium>(provider =>
-            new Chromium(
-                "https://app.loopcv.pro/login",
-                provider.GetRequiredService<ILogger<Chromium>>()
-            )
-        );
-        
-        // Register page content extractor
-        services.AddSingleton<IPageContentExtractor, ChromiumPageExtractor>(provider =>
-            new ChromiumPageExtractor(
-                provider.GetRequiredService<Chromium>(),
-                provider.GetRequiredService<ILogger<ChromiumPageExtractor>>(),
-                urlMatcher: url => url.Contains("loopcv.pro", StringComparison.OrdinalIgnoreCase)
-            )
-        );
         _provider = services.BuildServiceProvider();
     }
 

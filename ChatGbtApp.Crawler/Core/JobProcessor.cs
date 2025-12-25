@@ -1,5 +1,6 @@
 using ChatGbtApp;
 using ChatGbtApp.Interfaces;
+using ChatGgtApp.Crawler.Browser;
 using ChatGgtApp.Crawler.Interfaces;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
@@ -13,8 +14,8 @@ namespace ChatGgtApp.Crawler.Core;
 /// and storing results.
 /// </summary>
 public class JobProcessor(
-    IPageContentExtractor pageContentExtractor,
     JobStorage jobStorage,
+    Chromium chromium, 
     IOpenAiApi openAiApi,
     GptKeyValueParser gptParser,
     Prompt prompt,
@@ -31,43 +32,21 @@ public class JobProcessor(
             {
                 progress.RecordDuplicate();
                 logger.LogInformation("[{Url}] Skipping duplicate job", url);
-                return new JobProcessingResult
-                { Success = true,
-                    Url = url,
-                    WasDuplicate = true
-                };
+                return new JobProcessingResult { Success = true, Url = url, WasDuplicate = true };
             }
 
             logger.LogInformation("[{Url}] Starting job processing...", url);
-
-            // Extract content
-            var extractionResult = await pageContentExtractor.ExtractAsync(url);
-            if (!extractionResult.Success)
-            {
-                return new JobProcessingResult
-                {
-                    Success = false,
-                    Url = url,
-                    ErrorMessage = extractionResult.ErrorMessage ?? "Content extraction failed",
-                    WasEmpty = string.IsNullOrWhiteSpace(extractionResult.Content)
-                };
-            }
-
-            var jobDescription = extractionResult.Content ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(jobDescription))
+            var jobDescription = await chromium.FetchAsync(url);
+            
+            if (string.IsNullOrWhiteSpace(jobDescription.TextContent))
             {
                 logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
-                return new JobProcessingResult
-                {
-                    Success = false,
-                    Url = url,
-                    WasEmpty = true
-                };
+                return new JobProcessingResult{ Success = false, Url = url, WasEmpty = true };
             }
 
             // Analyze with AI
             logger.LogInformation("[{Url}] Requesting analysis from ChatGPT...", url);
-            var input = prompt.GetPrompt(jobDescription);
+            var input = prompt.GetPrompt(jobDescription.TextContent);
             var aiResponse = await openAiApi.AskAsync(input);
 
             // Parse AI response
@@ -75,19 +54,14 @@ public class JobProcessor(
             if (parsedData == null)
             {
                 logger.LogError("[{Url}] Failed to parse ChatGPT response; skipping.", url);
-                return new JobProcessingResult
-                {
-                    Success = false,
-                    Url = url,
-                    ErrorMessage = "Failed to parse AI response"
-                };
+                return new JobProcessingResult { Success = false, Url = url, ErrorMessage = "Failed to parse AI response" };
             }
 
             // Store results
             logger.LogInformation("[{Url}] Storing parsed results...", url);
-            jobStorage.Store(url, jobDescription, aiResponse, parsedData);
+            jobStorage.Store(url, jobDescription.TextContent, aiResponse, parsedData);
             progress.RecordSuccess();
-            
+
             logger.LogInformation(
                 "[{Url}] ChatGPT MatchScore: [{MatchScore}], Remote: {Remote}, Summary: {Summary}",
                 url, parsedData.MatchScore, parsedData.Remote, parsedData.Summary);

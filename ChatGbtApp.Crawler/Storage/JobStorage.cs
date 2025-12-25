@@ -13,10 +13,11 @@ namespace ChatGgtApp.Crawler.Storage;
 
 public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium> logger, JobProcessingProgress progress)
 {
-
+    private readonly object _lock = new();
+    
     public bool IsDuplicate(string url)
     {
-        lock (this)
+        lock (_lock)
         {
             var alreadyProcessed = dbContext.Jobs.Any(j => j.Url == url);
             if (alreadyProcessed)
@@ -43,7 +44,7 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
         var job = mapper.Map<Job>(baseJob);
         mapper.Map(values, job);
 
-        lock (this)
+        lock (_lock)
         {
             dbContext.Add(job);
             dbContext.SaveChanges();
