@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace ChatGgtApp.Crawler;
+namespace ChatGgtApp.Crawler.Parsers;
 
 public sealed class ParsedJobFit
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
-namespace ChatGgtApp.Crawler;
+namespace ChatGgtApp.Crawler.Browser;
 
 // DTO so caller knows if we got logged out instead of real content
 public class FetchResult

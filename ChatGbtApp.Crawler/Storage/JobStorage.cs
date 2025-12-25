@@ -3,15 +3,17 @@ using System.Text;
 using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
+using ChatGgtApp.Crawler.Browser;
+using ChatGgtApp.Crawler.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace ChatGgtApp.Crawler;
+namespace ChatGgtApp.Crawler.Storage;
 
 public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium> logger, JobProcessingProgress progress)
 {
 
-    public async Task<bool> IsDuplicate(string url)
+    public bool IsDuplicate(string url)
     {
         lock (this)
         {
@@ -27,7 +29,7 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
         return false;
     }
     
-    public async Task Store(string url, string jobDescription, string message, ParsedJobFit values)
+    public void Store(string url, string jobDescription, string message, ParsedJobFit values)
     {
         var baseJob = new JobBase
         {

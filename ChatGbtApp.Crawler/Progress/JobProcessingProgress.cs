@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace ChatGgtApp.Crawler;
+namespace ChatGgtApp.Crawler.Progress;
 
 public class JobProcessingProgress
 {

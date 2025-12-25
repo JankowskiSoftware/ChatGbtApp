@@ -2,7 +2,7 @@
 
 
 using ChatGbtApp;
-using ChatGgtApp.Crawler;
+using ChatGgtApp.Crawler.Core;
 using Microsoft.Extensions.Logging;
 
 ServiceContainer.Configure();

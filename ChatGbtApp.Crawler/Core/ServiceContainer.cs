@@ -1,10 +1,14 @@
 using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
+using ChatGgtApp.Crawler.Browser;
+using ChatGgtApp.Crawler.Parsers;
+using ChatGgtApp.Crawler.Progress;
+using ChatGgtApp.Crawler.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace ChatGgtApp.Crawler;
+namespace ChatGgtApp.Crawler.Core;
 
 public static class ServiceContainer
 {
@@ -36,6 +40,7 @@ public static class ServiceContainer
         );
         services.AddSingleton<GptKeyValueParser>();
         services.AddSingleton<JobProcessingProgress>();
+        services.AddSingleton<Prompt>();
         
         _provider = services.BuildServiceProvider();
         services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
