@@ -21,7 +21,7 @@ urls = "https://app.loopcv.pro/match/694aa3b81afabd962d8f388b,https://app.loopcv
 
 var crawler = ServiceContainer.Resolve<JobsCrawler>();
 
-await crawler.CrawlJobs(urls);
+await crawler.CrawlJobsAsync(urls);
 
 
 

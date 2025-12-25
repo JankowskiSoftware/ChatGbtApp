@@ -1,7 +1,11 @@
 using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
+using ChatGbtApp.Interfaces;
+using ChatGbtApp.Services;
 using ChatGgtApp.Crawler.Browser;
+using ChatGgtApp.Crawler.Extractors;
+using ChatGgtApp.Crawler.Interfaces;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using ChatGgtApp.Crawler.Storage;
@@ -17,7 +21,55 @@ public static class ServiceContainer
     public static void Configure()
     {
         var services = new ServiceCollection();
+        
+        AddLogging(services);
+        
+        // HttpClient factory and named client for OpenAI
+        services.AddHttpClient("OpenAI", client =>
+        {
+            client.Timeout = TimeSpan.FromMinutes(3);
+        });
+        
+        services.AddSingleton<AppDbContext>();
+        services.AddSingleton<JobStorage>();
+        services.AddSingleton<GptKeyValueParser>();
+        services.AddSingleton<JobProcessingProgress>();
+        services.AddSingleton<Prompt>();
+        
+        // OpenAI API
+        services.AddSingleton<IResponseParser, OpenAiResponseParser>();
+        services.AddSingleton<OpenAiApiFactory>();
+        services.AddSingleton<IOpenAiApi>(provider =>
+            provider.GetRequiredService<OpenAiApiFactory>().Create());
+        services.AddSingleton<IJobProcessor, JobProcessor>();
+        services.AddSingleton<JobsCrawler>();
+        
+        
+        
+        
+        services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
+        
+        // Register Chromium browser
+        services.AddSingleton<Chromium>(provider =>
+            new Chromium(
+                "https://app.loopcv.pro/login",
+                provider.GetRequiredService<ILogger<Chromium>>()
+            )
+        );
+        
+        // Register page content extractor
+        services.AddSingleton<IPageContentExtractor, ChromiumPageExtractor>(provider =>
+            new ChromiumPageExtractor(
+                provider.GetRequiredService<Chromium>(),
+                provider.GetRequiredService<ILogger<ChromiumPageExtractor>>(),
+                urlMatcher: url => url.Contains("loopcv.pro", StringComparison.OrdinalIgnoreCase)
+            )
+        );
+        _provider = services.BuildServiceProvider();
+    }
 
+    private static void AddLogging(ServiceCollection services)
+    {
         // Register services
         services.AddLogging(builder =>
         {
@@ -28,22 +80,6 @@ public static class ServiceContainer
             });
             builder.SetMinimumLevel(LogLevel.Information);
         });
-        services.AddSingleton<AppDbContext>();
-        services.AddSingleton<OpenAiApi>();
-        services.AddSingleton<JobsCrawler>();
-        services.AddSingleton<JobStorage>();
-        services.AddSingleton<Chromium>(provider =>
-            new Chromium(
-                "https://app.loopcv.pro/login",
-                provider.GetRequiredService<ILogger<Chromium>>()
-            )
-        );
-        services.AddSingleton<GptKeyValueParser>();
-        services.AddSingleton<JobProcessingProgress>();
-        services.AddSingleton<Prompt>();
-        
-        _provider = services.BuildServiceProvider();
-        services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
         _provider = services.BuildServiceProvider();
     }
 

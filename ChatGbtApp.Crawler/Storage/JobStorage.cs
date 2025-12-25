@@ -4,6 +4,7 @@ using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
 using ChatGgtApp.Crawler.Browser;
+using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
