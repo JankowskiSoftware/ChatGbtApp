@@ -12,59 +12,99 @@ public class FetchResult
 }
 
 public class Chromium(
-    ILogger<Chromium> logger,
     LoopCvLogger loopCvLogger,
-    string authStatePath = "auth.json")
+    string authStatePath = "auth.json") : IAsyncDisposable
 {
     private readonly string _userAgent =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
     private readonly ViewportSize _viewport = new() { Width = 1920, Height = 1080 };
 
+    private IPlaywright? _playwright;
+    private IBrowser? _browser;
+    private IBrowserContext? _context;
 
-    public async Task<FetchResult> FetchAsync(string targetUrl)
+
+    public async Task<IPage> FetchAsync(string targetUrl, bool hideBrowser = true)
     {
-        using var pw = await Playwright.CreateAsync();
-        await using var browser = await pw.Chromium.LaunchAsync();
-        var context = await browser.NewContextAsync(new()
+        if (_context == null)
         {
-            StorageStatePath = File.Exists(authStatePath) ? authStatePath : null,
-            UserAgent = _userAgent,
-            ViewportSize = _viewport
-        });
+            _playwright = await Playwright.CreateAsync();
+            _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = hideBrowser,
+                //     SlowMo = 50                    
+            });
+            _context = await _browser.NewContextAsync(new()
+            {
+                StorageStatePath = File.Exists(authStatePath) ? authStatePath : null,
+                UserAgent = _userAgent,
+                ViewportSize = _viewport
+            });
+        }
 
-        // load target page
-        var page = await context.NewPageAsync();
-        await page.GotoAsync(targetUrl, new() { WaitUntil = WaitUntilState.NetworkIdle });
+        var page = await _context.NewPageAsync();
+        await page.GotoAsync(targetUrl, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
 
-
-        // first check if we're logged in
         if (!await loopCvLogger.IsLoggedInAsync(page))
         {
             await loopCvLogger.LogIn();
+
+            try
+            {
+                await _context.CloseAsync();
+            }
+            catch
+            {
+            }
+
+            _context = await _browser!.NewContextAsync(new()
+            {
+                StorageStatePath = File.Exists(authStatePath) ? authStatePath : null,
+                UserAgent = _userAgent,
+                ViewportSize = _viewport
+            });
+
+            page = await _context.NewPageAsync();
+            await page.GotoAsync(targetUrl, new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+            if (!await loopCvLogger.IsLoggedInAsync(page))
+                throw new Exception("Failed to log in");
         }
 
-        // reload page after login
-        page = await context.NewPageAsync();
-        await page.GotoAsync(targetUrl, new() { WaitUntil = WaitUntilState.NetworkIdle });
+        return page;
 
-        // second check if we're logged in
-        if (!await loopCvLogger.IsLoggedInAsync(page))
+        // await page.WaitForTextCycleAsync("Loading items...");
+        // var textContent = await page.InnerTextAsync("body");
+        // var html = await page.ContentAsync();
+        // try { await page.CloseAsync(); } catch { }
+        //
+        // return new FetchResult { TextContent = textContent, Html = html };
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
         {
-            // still not logged in, throw
-            throw new Exception("Failed to log in");
+            if (_context != null) await _context.CloseAsync();
+        }
+        catch
+        {
         }
 
-        // here we are logged in, save auth state and capture content before closing context
-        var textContent = await page.InnerTextAsync("body");
-        var html = await page.ContentAsync();
-
-        await context.CloseAsync();
-
-        return new FetchResult
+        try
         {
-            TextContent = textContent,
-            Html = html
-        };
+            if (_browser != null) await _browser.CloseAsync();
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            _playwright?.Dispose();
+        }
+        catch
+        {
+        }
     }
 }

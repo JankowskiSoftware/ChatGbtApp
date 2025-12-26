@@ -9,7 +9,7 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var solutionRoot = SolutionDirectory.FindRepoRoot();
+        var solutionRoot = SolutionDirectory.GetRepoPath();
         
         var dataDirectory = Path.Combine(solutionRoot, "data");
         Directory.CreateDirectory(dataDirectory); // Ensure directory exists

@@ -36,9 +36,11 @@ public class JobProcessor(
             }
 
             logger.LogInformation("[{Url}] Starting job processing...", url);
-            var jobDescription = await chromium.FetchAsync(url);
-            
-            if (string.IsNullOrWhiteSpace(jobDescription.TextContent))
+            var page = await chromium.FetchAsync(url);
+            await page.WaitForTextAsync("Job Description");
+            var jobDescription = await page.InnerTextAsync("body");
+                
+            if (string.IsNullOrWhiteSpace(jobDescription))
             {
                 logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
                 return new JobProcessingResult{ Success = false, Url = url, WasEmpty = true };
@@ -46,7 +48,7 @@ public class JobProcessor(
 
             // Analyze with AI
             logger.LogInformation("[{Url}] Requesting analysis from ChatGPT...", url);
-            var input = prompt.GetPrompt(jobDescription.TextContent);
+            var input = prompt.GetPrompt(jobDescription);
             var aiResponse = await openAiApi.AskAsync(input);
 
             // Parse AI response
@@ -59,7 +61,7 @@ public class JobProcessor(
 
             // Store results
             logger.LogInformation("[{Url}] Storing parsed results...", url);
-            jobStorage.Store(url, jobDescription.TextContent, aiResponse, parsedData);
+            jobStorage.Store(url, jobDescription, aiResponse, parsedData);
             progress.RecordSuccess();
 
             logger.LogInformation(

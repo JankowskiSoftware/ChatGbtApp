@@ -92,7 +92,7 @@ public class SolutionDirectoryTests : IDisposable
         var deepDir = CreateSubDir("project", "src", "components");
         Directory.SetCurrentDirectory(deepDir);
 
-        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.FindRepoRoot());
+        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.GetRepoPath());
         
         Assert.Contains("Repo root not found", exception.Message);
         Assert.Contains(".git", exception.Message);
@@ -105,7 +105,7 @@ public class SolutionDirectoryTests : IDisposable
         var testDir = CreateSubDir("isolated");
         Directory.SetCurrentDirectory(testDir);
 
-        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.FindRepoRoot());
+        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.GetRepoPath());
         
         Assert.Contains("Repo root not found", exception.Message);
     }
@@ -153,7 +153,7 @@ public class SolutionDirectoryTests : IDisposable
         var subDir = CreateSubDir("src");
         Directory.SetCurrentDirectory(subDir);
 
-        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.FindRepoRoot());
+        var exception = Assert.Throws<DirectoryNotFoundException>(() => SolutionDirectory.GetRepoPath());
         
         Assert.Contains("Repo root not found", exception.Message);
     }
@@ -172,6 +172,6 @@ public class SolutionDirectoryTests : IDisposable
     private string FindFromDirectory(string dir)
     {
         Directory.SetCurrentDirectory(dir);
-        return SolutionDirectory.FindRepoRoot();
+        return SolutionDirectory.GetRepoPath();
     }
 }

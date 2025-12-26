@@ -2,6 +2,7 @@
 
 public static  class LoopcvConst
 {
+    public const string MainUrl = "https://app.loopcv.pro";
     public const string LoginUrl = "https://app.loopcv.pro/login";
     public static readonly string Email = Environment.GetEnvironmentVariable("LOOP_EMAIL");
     public static readonly string  Password = Environment.GetEnvironmentVariable("LOOP_PASS");

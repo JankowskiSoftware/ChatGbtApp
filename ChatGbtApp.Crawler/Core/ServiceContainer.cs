@@ -44,7 +44,9 @@ public static class ServiceContainer
             provider.GetRequiredService<OpenAiApiFactory>().Create());
         services.AddSingleton<IJobProcessor, JobProcessor>();
         services.AddSingleton<JobsCrawler>();
+        services.AddSingleton<MatchesExtractor>();
         services.AddSingleton<Chromium>();
+        services.AddSingleton<MatchesCrawler>();
         
         // Loopcv login service
         services.AddSingleton<LoopCvLogger>(provider =>

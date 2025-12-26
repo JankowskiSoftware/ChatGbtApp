@@ -2,7 +2,10 @@
 
 public static class SolutionDirectory
 {
-    public static string FindRepoRoot()
+    public const string Path_JobUrls = "data/job-urls.txt";
+    
+    
+    public static string GetRepoPath()
     {
         var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
         while (dir != null)
@@ -14,5 +17,10 @@ public static class SolutionDirectory
             dir = dir.Parent;
         }
         throw new DirectoryNotFoundException("Repo root not found (no .git or .sln in parent folders).");
+    }
+
+    public static string GetRepoPath(string relativePath)
+    {
+        return Path.Combine(GetRepoPath(), relativePath); 
     }
 }

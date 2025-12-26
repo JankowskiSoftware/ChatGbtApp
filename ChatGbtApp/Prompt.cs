@@ -4,7 +4,7 @@ public class Prompt
 {
     public string GetPrompt(string jobDescription)
     {
-        var solutionRoot = SolutionDirectory.FindRepoRoot();
+        var solutionRoot = SolutionDirectory.GetRepoPath();
         var promptTemplate = File.ReadAllText(Path.Combine(solutionRoot, "data/prompt.txt"));
         var cv = File.ReadAllText(Path.Combine(solutionRoot, "data/cv.txt"));
 

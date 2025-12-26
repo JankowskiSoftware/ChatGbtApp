@@ -26,14 +26,8 @@ public class JobsCrawler
         _logger = logger;
         _maxParallelism = maxParallelism;
     }
-
-    /// <summary>
-    /// Processes multiple job URLs in parallel.
-    /// </summary>
-    /// <param name="urls">Comma-separated list of job URLs to process.</param>
-    public async Task CrawlJobsAsync(string urls)
+    public async Task CrawlJobsAsync(List<string> links)
     {
-        var links = ParseUrls(urls);
         if (links.Count == 0)
         {
             _logger.LogWarning("No URLs provided to crawl");
@@ -69,14 +63,5 @@ public class JobsCrawler
         {
             _logger.LogCritical(ex, "[{Url}] Unexpected error during processing", url);
         }
-    }
-
-    private static List<string> ParseUrls(string urls)
-    {
-        return urls
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(url => url.Trim())
-            .Where(url => !string.IsNullOrWhiteSpace(url))
-            .ToList();
     }
 }
