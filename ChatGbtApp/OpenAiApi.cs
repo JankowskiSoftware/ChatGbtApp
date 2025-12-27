@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using ChatGbtApp.Interfaces;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 
 namespace ChatGbtApp;
 
@@ -13,6 +15,7 @@ public class OpenAiApi : IOpenAiApi
     private readonly string _apiKey;
     private readonly string _apiUrl;
     private readonly ILogger? _logger;
+    private readonly RetryPolicy _policy;
 
     public OpenAiApi(HttpClient httpClient, IResponseParser responseParser, ILogger<OpenAiApi> logger, string apiKey, string apiUrl = "https://api.openai.com/v1/responses")
     {
@@ -23,15 +26,28 @@ public class OpenAiApi : IOpenAiApi
         _logger = logger;
         
         _httpClient.Timeout = TimeSpan.FromMinutes(3);
+        
+        _policy = Policy
+            .Handle<Exception>()
+            .WaitAndRetry(
+                retryCount: 3,
+                sleepDurationProvider: attempt =>
+                    TimeSpan.FromMilliseconds(200 * Math.Pow(2, attempt - 1))
+            );
     }
 
-    public async Task<string> AskAsync(string input, string model = "gpt-4.1-mini")
+    public async Task<string> AskAsync(string input, string model)
     {
         var request = CreateRequest(input, model);
         
-        using var resp = await _httpClient.SendAsync(request);
-        resp.EnsureSuccessStatusCode();
-        var respText = await resp.Content.ReadAsStringAsync();
+        string respText = "";
+        await _policy.Execute(async () =>
+        {
+            using var resp = await _httpClient.SendAsync(request);
+            resp.EnsureSuccessStatusCode();
+            respText = await resp.Content.ReadAsStringAsync(); 
+        });
+        
 
         try
         {

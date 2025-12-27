@@ -4,7 +4,7 @@ using ChatGgtApp.Crawler.Extractors.Loopcv;
 
 namespace ChatGgtApp.Crawler.Core;
 
-public class MatchesCrawler(Chromium chromium)
+public class MatchesCrawler(MatchesExtractor matchesExtractor)
 {
     private readonly List<string> EXCLUDED_JOB_TITLES = new()
     {
@@ -40,22 +40,31 @@ public class MatchesCrawler(Chromium chromium)
         "Drupal",
         "Middleware",
         "Ruby",
+        "Architect",
+        "Staff",
+        "OPS"
+        
     };
     
     public async Task CrawlAsync(string matchesUrl)
     {
-        var matches = await new MatchesExtractor().GetMatchUrlsAsync(matchesUrl);
+        var matches = await matchesExtractor.GetMatchUrlsAsync(matchesUrl);
             
         var filteredMatches = matches
             .Where(_ => ShouldIncludeJobTitle(_.JobTitle))
             .ToArray();
 
+
         var outputPath = SolutionDirectory.GetRepoPath(SolutionDirectory.Path_JobUrls);
-        
         await File.WriteAllLinesAsync(outputPath, 
             filteredMatches
                 .Select(m => $"{m.JobTitle}, {m.Url}")
-            );
+        );
+        
+        // var json = System.Text.Json.JsonSerializer.Serialize(filteredMatches);
+        // await File.WriteAllTextAsync(outputPath + ".json", json);
+        //
+        // var deserializedJobs = System.Text.Json.JsonSerializer.Deserialize<List<Match>>(json);
 
         Console.WriteLine($"Found filtered {filteredMatches.Count()} job titles.");
         foreach (var match in filteredMatches)

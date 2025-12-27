@@ -1,19 +1,13 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using AutoMapper;
-using ChatGbtApp;
-using ChatGbtApp.Repository;
-using ChatGgtApp.Crawler.Browser;
-using ChatGgtApp.Crawler.Parsers;
+﻿using ChatGbtApp.Repository;
 using ChatGgtApp.Crawler.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace ChatGgtApp.Crawler.Storage;
 
-public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium> logger, JobProcessingProgress progress)
+public class JobStorage(AppDbContext dbContext, ILogger<JobStorage> logger, JobProcessingProgress progress)
 {
-    private readonly object _lock = new();
+    private static readonly object _lock = new();
     
     public bool IsDuplicate(string url)
     {
@@ -23,7 +17,6 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
             if (alreadyProcessed)
             {
                 logger.LogInformation($"[{url}] Duplicate detected; URL already in database.");
-                progress.RecordDuplicate();
                 return true;
             } 
         }
@@ -31,27 +24,24 @@ public class JobStorage(AppDbContext dbContext, IMapper mapper, ILogger<Chromium
         return false;
     }
     
-    public void Store(string url, string jobDescription, string message, ParsedJobFit values)
+    public void Store(Job job)
     {
-        var baseJob = new JobBase
+        try
         {
-            Url = url,
-            DateTime = DateTime.Now,
-            JobDescription = jobDescription,
-            Message = message,
-        };
-        
-        var job = mapper.Map<Job>(baseJob);
-        mapper.Map(values, job);
+            lock (_lock)
+            {
+                dbContext.Add(job);
+                dbContext.SaveChanges();
+            }
 
-        lock (_lock)
-        {
-            dbContext.Add(job);
-            dbContext.SaveChanges();
+            logger.LogInformation($"[{job.Url}] Successfully stored job listing.");
         }
-
-        
-        progress.RecordSuccess();
-        logger.LogInformation($"[{url}] Successfully stored job listing.");
+        catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+        {
+            logger.LogInformation($"[{job.Url}] Duplicate detected during save.");
+        }
     }
+
+    private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
+        ex.InnerException?.Message.Contains("UNIQUE constraint failed", StringComparison.OrdinalIgnoreCase) == true;
 }

@@ -33,18 +33,8 @@ public class LoopCvLogger(
         return true;
     }
 
-    public async Task LogIn()
+    public async Task LogIn(IPage page)
     {
-        using var pw = await Playwright.CreateAsync();
-
-        var browser = await pw.Chromium.LaunchAsync(new()
-        {
-            Headless = false
-        });
-
-        var context = await browser.NewContextAsync();
-        var page = await context.NewPageAsync();
-
         await page.GotoAsync(loginUrl);
 
         // Wait for email input by placeholder (handles JS/redirects)
@@ -63,13 +53,6 @@ public class LoopCvLogger(
         await page.WaitForURLAsync("**/overview");
         // or: await page.WaitForSelectorAsync("css=selector-for-logged-in-ui");
 
-        await context.StorageStateAsync(new()
-        {
-            Path = authStatePath
-        });
-
         logger.LogInformation("Saved auth state to {Path}", authStatePath);
-
-        await browser.CloseAsync();
     }
 }

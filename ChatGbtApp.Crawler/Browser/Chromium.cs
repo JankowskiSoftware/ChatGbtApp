@@ -1,15 +1,7 @@
 ﻿using ChatGgtApp.Crawler.Extractors.Loopcv;
-using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
 
 namespace ChatGgtApp.Crawler.Browser;
-
-// DTO so the caller knows if we got logged out instead of real content
-public class FetchResult
-{
-    public string? TextContent { get; set; }
-    public string? Html { get; set; }
-}
 
 public class Chromium(
     LoopCvLogger loopCvLogger,
@@ -48,7 +40,11 @@ public class Chromium(
 
         if (!await loopCvLogger.IsLoggedInAsync(page))
         {
-            await loopCvLogger.LogIn();
+            await loopCvLogger.LogIn(page);
+            await _context.StorageStateAsync(new()
+            {
+                Path = authStatePath
+            });
 
             try
             {
@@ -56,6 +52,7 @@ public class Chromium(
             }
             catch
             {
+                
             }
 
             _context = await _browser!.NewContextAsync(new()

@@ -7,12 +7,12 @@ namespace ChatGgtApp.Crawler.Extractors.Loopcv;
 
 using HtmlAgilityPack;
 
-public class MatchesExtractor
+public class MatchesExtractor(ChromiumFactory chromiumFactory)
 {
     public async Task<List<JobLink>> GetMatchUrlsAsync(string matchesPageUrl)
     {
-        await using var chromium = ServiceContainer.Resolve<Chromium>();
-        var page = await chromium.FetchAsync(matchesPageUrl, false);
+        var page = await chromiumFactory.Create()
+            .FetchAsync(matchesPageUrl, false);
 
 
         var results = new List<JobLink>();
@@ -29,26 +29,49 @@ public class MatchesExtractor
             var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
+            // var rows = doc.DocumentNode.SelectNodes("//tbody/tr");
+            // foreach (var row in rows)
+            // {
+            //     var link = doc.DocumentNode.SelectNodes("//td[2]/a").First();
+            //     var company = doc.DocumentNode.SelectNodes("//td[3]").First().InnerHtml;
+            //     var location = doc.DocumentNode.SelectNodes("//td[4]").First().InnerHtml;
+            //     var platform = doc.DocumentNode.SelectNodes("//td[6]").First().InnerHtml;
+            //
+            //     string jobTitle = link.InnerText.Trim();
+            //     string url = link.GetAttributeValue("href", "");
+            //     
+            //     results.Add(new JobLink(
+            //         jobTitle,
+            //         LoopcvConst.MainUrl + url,
+            //         company,
+            //         location,
+            //         platform)
+            //     );
+            // }
+
+
             var jobLinks = doc.DocumentNode.SelectNodes("//tbody/tr/td[2]/a");
             if (jobLinks == null)
             {
                 throw new Exception("No job links found on matches page");
             }
-
-
+            
             foreach (var link in jobLinks)
             {
                 string jobTitle = link.InnerText.Trim();
                 string url = link.GetAttributeValue("href", "");
                 results.Add(new JobLink(jobTitle, LoopcvConst.MainUrl + url));
             }
-            
+
             Console.WriteLine($"Loaded {results.Count} pages.");
         }
 
 
         return results;
     }
+
+    public record JobLink(string JobTitle, string Url);
+    // public record JobLink(string JobTitle, string Url, string CompanyName, string Location, string Platform);
 
     // public async Task<List<JobLink>> GetMatchUrlsAsync(IPage page, ILocator nextButton)
     // {
@@ -66,11 +89,12 @@ public class MatchesExtractor
     //     }
     //
     //
+    
     //     // recursive next page
     //     /////////////////
     //
     //
-    
+
     //    div[contains(@class, 'class-name-1')]
 
     //     var task = page.Locator($"div.v-data-table--loading")
@@ -114,7 +138,4 @@ public class MatchesExtractor
     //
     //     return results;
     // }
-
-
-    public record JobLink(string JobTitle, string Url);
 }

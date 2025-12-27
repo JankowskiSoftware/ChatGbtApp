@@ -1,7 +1,7 @@
 using ChatGbtApp;
 using ChatGbtApp.Interfaces;
+using ChatGbtApp.Repository;
 using ChatGgtApp.Crawler.Browser;
-using ChatGgtApp.Crawler.Interfaces;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using ChatGgtApp.Crawler.Storage;
@@ -15,75 +15,109 @@ namespace ChatGgtApp.Crawler.Core;
 /// </summary>
 public class JobProcessor(
     JobStorage jobStorage,
-    Chromium chromium, 
     IOpenAiApi openAiApi,
-    GptKeyValueParser gptParser,
     Prompt prompt,
+    ChromiumFactory chromiumFactory,
     ILogger<JobProcessor> logger,
     JobProcessingProgress progress)
-    : IJobProcessor
 {
-    public async Task<JobProcessingResult> ProcessJobAsync(string url)
+    public async Task ProcessJobAsync(string url)
     {
-        try
+        if (jobStorage.IsDuplicate(url))
         {
-            // Check for duplicates first
-            if (jobStorage.IsDuplicate(url))
-            {
-                progress.RecordDuplicate();
-                logger.LogInformation("[{Url}] Skipping duplicate job", url);
-                return new JobProcessingResult { Success = true, Url = url, WasDuplicate = true };
-            }
+            progress.RecordDuplicate();
+            logger.LogInformation("[{Url}] Skipping duplicate job", url);
+            return;
+        }
 
-            logger.LogInformation("[{Url}] Starting job processing...", url);
-            var page = await chromium.FetchAsync(url);
-            await page.WaitForTextAsync("Job Description");
-            var jobDescription = await page.InnerTextAsync("body");
-                
-            if (string.IsNullOrWhiteSpace(jobDescription))
-            {
-                logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
-                return new JobProcessingResult{ Success = false, Url = url, WasEmpty = true };
-            }
+        logger.LogInformation("[{Url}] Starting job processing...", url);
 
-            // Analyze with AI
-            logger.LogInformation("[{Url}] Requesting analysis from ChatGPT...", url);
-            var input = prompt.GetPrompt(jobDescription);
-            var aiResponse = await openAiApi.AskAsync(input);
+        var jobDescription = await GetJobDescription(url);
+        if (string.IsNullOrWhiteSpace(jobDescription))
+        {
+            progress.RecordEmpty();
+            logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
+            return;
+        }
 
-            // Parse AI response
-            var parsedData = gptParser.ParseOrNull(aiResponse);
-            if (parsedData == null)
-            {
-                logger.LogError("[{Url}] Failed to parse ChatGPT response; skipping.", url);
-                return new JobProcessingResult { Success = false, Url = url, ErrorMessage = "Failed to parse AI response" };
-            }
-
-            // Store results
-            logger.LogInformation("[{Url}] Storing parsed results...", url);
-            jobStorage.Store(url, jobDescription, aiResponse, parsedData);
+        logger.LogInformation("[{Url}] ChatGPT running simple prompt...", url);
+        var isDotNetRole = await ExecuteSimplePrompt(url, jobDescription);
+        if (!isDotNetRole)
+        {
             progress.RecordSuccess();
-
-            logger.LogInformation(
-                "[{Url}] ChatGPT MatchScore: [{MatchScore}], Remote: {Remote}, Summary: {Summary}",
-                url, parsedData.MatchScore, parsedData.Remote, parsedData.Summary);
-
-            return new JobProcessingResult
-            {
-                Success = true,
-                Url = url,
-                ParsedData = parsedData
-            };
+            logger.LogInformation("[{Url}] ChatGPT - Noe matching role", url);
+            return;
         }
-        catch (Exception ex)
+
+        logger.LogInformation("[{Url}] ChatGPT running full prompt...", url);
+        await ExecuteFullPrompt(url, jobDescription);
+        progress.RecordSuccess();
+    }
+
+    private async Task<string?> GetJobDescription(string url)
+    {
+        await using var chromium = chromiumFactory.Create();
+        var page = await chromium.FetchAsync(url);
+        await page.WaitForTextAsync("Job Description");
+        return await page.InnerTextAsync("body");
+    }
+
+    private async Task<bool> ExecuteSimplePrompt(string url, string jobDescription)
+    {
+        // Evaluate if It looks like a good match.
+        var input = prompt.GetPrompt("simple-prompt", jobDescription);
+        var aiResponse = await openAiApi.AskAsync(input, "gpt-5-nano");
+
+        if (aiResponse.Contains("false"))
         {
-            logger.LogError(ex, "[{Url}] Error processing job", url);
-            return new JobProcessingResult
+            jobStorage.Store(new Job
             {
-                Success = false,
                 Url = url,
-                ErrorMessage = ex.Message
-            };
+                JobDescription = jobDescription,
+                Message = "Not a good match",
+                Score = 0,
+            });
+
+            return false;
         }
+
+        return true;
+    }
+
+    private async Task ExecuteFullPrompt(string url, string jobDescription)
+    {
+        // Analyze with AI
+        logger.LogInformation("[{Url}] Requesting analysis from ChatGPT...", url);
+        var input = prompt.GetPrompt("full-prompt", jobDescription);
+        var aiResponse = await openAiApi.AskAsync(input, "gpt-5-mini");
+
+        var values = StringKeyValueParser.Parse(aiResponse);
+
+        var job = new Job
+        {
+            Url = url,
+            JobDescription = jobDescription,
+            Message = aiResponse,
+            JobTitle = values.Get("jobTitle"),
+            CompanyName = values.Get("companyName"),
+            Location = values.Get("location"),
+            Remote = values.Get("remote"),
+            IsDotNetRole = int.Parse(values.Get("isDotNetRole") ?? "-1"),
+            MacroserviceScore = values.Get("microservicesScore"),
+            ContractType = values.Get("contractType"),
+            Seniority = values.Get("seniority"),
+            Currency = values.Get("currency"),
+            HourlyMin = values.Get("hourlyMin"),
+            HourlyMax = values.Get("hourlyMax"),
+            SalaryIsEstimated = values.Get("salaryIsEstimated"),
+            SalaryOriginalText = values.Get("salaryOriginalText"),
+            DeliveryPressureScore = values.Get("deliveryPressureScore"),
+            TechKeywords = values.Get("techKeywords"),
+            Confidence = values.Get("confidence"),
+            Notes = values.Get("notes"),
+            Score = int.Parse(values.Get("score") ?? "-1"),
+        };
+
+        jobStorage.Store(job);
     }
 }

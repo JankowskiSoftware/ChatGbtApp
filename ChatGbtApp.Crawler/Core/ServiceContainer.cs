@@ -1,12 +1,9 @@
-using AutoMapper;
 using ChatGbtApp;
 using ChatGbtApp.Repository;
 using ChatGbtApp.Interfaces;
 using ChatGbtApp.Services;
 using ChatGgtApp.Crawler.Browser;
-using ChatGgtApp.Crawler.Extractors;
 using ChatGgtApp.Crawler.Extractors.Loopcv;
-using ChatGgtApp.Crawler.Interfaces;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using ChatGgtApp.Crawler.Storage;
@@ -22,31 +19,28 @@ public static class ServiceContainer
     public static void Configure()
     {
         var services = new ServiceCollection();
-        
+
         AddLogging(services);
-        
+
         // HttpClient factory and named client for OpenAI
-        services.AddHttpClient("OpenAI", client =>
-        {
-            client.Timeout = TimeSpan.FromMinutes(3);
-        });
-        
-        services.AddSingleton<AppDbContext>();
-        services.AddSingleton<JobStorage>();
-        services.AddSingleton<GptKeyValueParser>();
+        services.AddHttpClient("OpenAI", client => { client.Timeout = TimeSpan.FromMinutes(3); });
+
+        services.AddDbContext<AppDbContext>(); // scoped by default
+        services.AddScoped<JobStorage>();
+        services.AddSingleton<StringKeyValueParser>();
         services.AddSingleton<JobProcessingProgress>();
         services.AddSingleton<Prompt>();
-        
+
         // OpenAI API
         services.AddSingleton<IResponseParser, OpenAiResponseParser>();
         services.AddSingleton<OpenAiApiFactory>();
         services.AddSingleton<IOpenAiApi>(provider =>
             provider.GetRequiredService<OpenAiApiFactory>().Create());
-        services.AddSingleton<IJobProcessor, JobProcessor>();
+        services.AddScoped<JobProcessor>();
         services.AddSingleton<JobsCrawler>();
         services.AddSingleton<MatchesExtractor>();
-        services.AddSingleton<Chromium>();
         services.AddSingleton<MatchesCrawler>();
+        services.AddSingleton<ChromiumFactory>();
         
         // Loopcv login service
         services.AddSingleton<LoopCvLogger>(provider =>
@@ -57,8 +51,6 @@ public static class ServiceContainer
                 LoopcvConst.LoginUrl
             )
         );
-        
-        services.AddSingleton<IMapper>(_ => CreateMapper(Resolve<ILoggerFactory>()));
         
         _provider = services.BuildServiceProvider();
     }
@@ -92,15 +84,5 @@ public static class ServiceContainer
             throw new InvalidOperationException("ServiceContainer not configured. Call Configure() first.");
 
         return _provider.GetRequiredService(type);
-    }
-    
-    private static IMapper CreateMapper(ILoggerFactory loggerFactory){
-        var config = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<JobBase, Job>();
-            cfg.CreateMap<ParsedJobFit, Job>();
-        }, loggerFactory);
-
-        return config.CreateMapper();
     }
 }

@@ -9,7 +9,7 @@ Follow these rules strictly:
    - Start with exactly: <<<RESULTS>>>
    - End with exactly: <<<END>>>
    - Contain ONLY simple key=value pairs
-   - Contain EXACTLY 10 keys
+   - Contain EXACTLY 7 keys
    - Use one key=value pair per line
    - NOT contain any extra text, comments, or formatting
 3. If you cannot follow this format exactly, respond with: FORMAT_ERROR
@@ -48,22 +48,6 @@ seniorityFit:
 - medium = partially meets expectations
 - low = below expectations
 
-missingSkills:
-- Comma-separated list of important skills mentioned in the role
-- Include only skills that are required or strongly preferred
-- Exclude skills that are optional or minor
-- If no important skills are missing, return an empty value
-
-missingAtsKeywoards:
-- CVs are analyzed by ATS systems to figure out how well the CV is matching the requirements.
-- suggest what kewoards to add 
-- order tchem from most important to least importat 
-
-strengths:
-- Comma-separated list of the candidate’s strongest matching skills
-- Include only skills directly relevant to the role
-- Prioritize core technologies and experience
-
 recommendation:
 - Short, actionable sentence
 - Examples: "Apply", "Apply with reservations", "Upskill before applying"
@@ -86,7 +70,6 @@ dotNetRole:
 
 frontend:
 - values from 1-3 describeing how frontend havy the role is
-
 
 OUTPUT:
 Return a short explanation first, then the results block.

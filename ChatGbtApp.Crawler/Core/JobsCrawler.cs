@@ -1,5 +1,5 @@
-﻿using ChatGgtApp.Crawler.Interfaces;
-using ChatGgtApp.Crawler.Progress;
+﻿using ChatGgtApp.Crawler.Progress;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ChatGgtApp.Crawler.Core;
@@ -10,18 +10,18 @@ namespace ChatGgtApp.Crawler.Core;
 /// </summary>
 public class JobsCrawler
 {
-    private readonly IJobProcessor _jobProcessor;
+    private readonly IServiceScopeFactory _scopeFactory;
     private readonly JobProcessingProgress _progress;
     private readonly ILogger<JobsCrawler> _logger;
     private readonly int _maxParallelism;
 
     public JobsCrawler(
-        IJobProcessor jobProcessor,
+        IServiceScopeFactory scopeFactory,
         JobProcessingProgress progress,
         ILogger<JobsCrawler> logger,
         int maxParallelism = 1)
     {
-        _jobProcessor = jobProcessor;
+        _scopeFactory = scopeFactory;
         _progress = progress;
         _logger = logger;
         _maxParallelism = maxParallelism;
@@ -50,13 +50,10 @@ public class JobsCrawler
     {
         try
         {
-            var result = await _jobProcessor.ProcessJobAsync(url);
+            using var scope = _scopeFactory.CreateScope();
+            var processor = scope.ServiceProvider.GetRequiredService<JobProcessor>();
 
-            if (result.WasEmpty)
-            {
-                _progress.RecordEmpty();
-            }
-
+            await processor.ProcessJobAsync(url);
             _progress.LogProgress();
         }
         catch (Exception ex)

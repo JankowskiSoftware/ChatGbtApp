@@ -2,14 +2,12 @@
 
 public class Prompt
 {
-    public string GetPrompt(string jobDescription)
+    public string GetPrompt(string promptName, string jobDescription)
     {
-        var solutionRoot = SolutionDirectory.GetRepoPath();
-        var promptTemplate = File.ReadAllText(Path.Combine(solutionRoot, "data/prompt.txt"));
-        var cv = File.ReadAllText(Path.Combine(solutionRoot, "data/cv.txt"));
+        var promptPath = SolutionDirectory.GetRepoPath($"data/{promptName}.txt");
+        var promptTemplate = File.ReadAllText(promptPath);
 
         return promptTemplate
-            .Replace("{{CV}}", cv)
             .Replace("{{JOB DESCROPTION}}", jobDescription);
     }
 }

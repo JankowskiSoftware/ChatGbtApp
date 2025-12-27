@@ -1,0 +1,104 @@
+﻿You extract structured information from a job offer.
+
+OUTPUT FORMAT (strict):
+- Return ONLY lines in the exact format: fieldName:value
+- EXACTLY the fields listed below, in the exact order, one per line.
+- No extra lines, no explanations, no markdown.
+- If unknown/not found: value must be null (literal "null").
+- Values must NOT contain semicolons. If the source text contains semicolons, replace them with commas.
+- For lists: use comma-separated values (no brackets).
+
+FIELDS (output exactly these, in this exact order):
+jobTitle:
+companyName:
+location:
+remote:
+isDotNetRole:
+microservicesScore:
+contractType:
+seniority:
+currency:
+hourlyMin:
+hourlyMax:
+salaryIsEstimated:
+salaryOriginalText:
+deliveryPressureScore:
+techKeywords:
+confidence:
+notes:
+score:
+
+DEFINITIONS / RULES:
+
+jobTitle:
+- The role title. If unclear: null.
+
+companyName:
+- Company name. If unclear: null.
+
+location:
+- Country, City
+
+remote:
+- One of: remote, hybrid, onsite, unknown.
+
+isDotNetRole:
+- Integer 1..5
+- true ONLY if the primary role is backend .NET (C#/.NET/.NET Core/ASP.NET Core as core requirements).
+- false if mainly frontend, QA, data, DevOps-only, desktop-only (WPF/WinForms), or mobile-only (Xamarin/MAUI),
+  or if .NET is only “nice to have” while another stack is primary.
+
+microservicesScore:
+- Integer 1..5:
+  1 = not mentioned / likely monolith / unclear
+  3 = some distributed signals (cloud backend, multiple services, APIs at scale) but microservices not explicit
+  5 = explicit microservices/distributed (microservices, distributed systems, k8s/OpenShift, event-driven, service mesh, Kafka, etc.)
+
+contractType:
+- One of: B2B, employment, any, unknown.
+
+seniority:
+- One of: junior, mid, senior, lead, principal, unknown (infer from title/requirements).
+
+Salary -> hourly:
+- Extract salary info if present and normalize to hourlyMin/hourlyMax + currency.
+- If salary is present: salaryIsEstimated=false.
+- If salary is missing: estimate a reasonable hourly range for a senior .NET backend role in distributed systems,
+  set salaryIsEstimated=true. Make this estimation based on the country, city, company, position and that it would be remote.
+- If location/currency is unclear during estimation:
+  - Prefer EUR for remote EU roles; otherwise keep currency=null and still provide hourlyMin/hourlyMax.
+- Conversions:
+  - day rate => 8 hours/day
+  - week => 40 hours/week
+  - month => 173.33 hours/month (52*40/12)
+  - year => 2080 hours/year (52*40)
+
+currency:
+- Prefer ISO codes (PLN/EUR/USD/GBP). If unknown => null.
+
+salaryOriginalText:
+- Short snippet/summary of the salary line if present, else null.
+- Must not contain semicolons.
+
+deliveryPressureScore:
+- Integer 1..5:
+  1 = steady pace / quality focus
+  5 = explicit fast-paced / tight deadlines / high delivery pressure
+
+techKeywords:
+- Comma-separated list of up to ~20 key tech terms mentioned.
+
+confidence:
+- 1..5 numeric, based on how clearly the offer states the facts.
+
+notes:
+- Very short extra info / assumptions. No semicolons.
+
+score:
+- how close this offer is to my requirements of: distributed .net backend well-payed senior remote role.  
+
+
+
+
+JOB DESCROPTION:
+{{JOB DESCROPTION}}

@@ -25,17 +25,32 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<bool>("Applied")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Company")
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Confidence")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ContractType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Currency")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("DateTime")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DotNetRole")
+                    b.Property<string>("DeliveryPressureScore")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Frontend")
+                    b.Property<string>("HourlyMax")
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("HourlyMin")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("IsDotNetRole")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("JobDescription")
                         .HasColumnType("TEXT");
@@ -43,24 +58,19 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("JobTitle")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Marked")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Location")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int?>("MatchScore")
+                    b.Property<string>("MacroserviceScore")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("Marked")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
                         .HasColumnType("TEXT");
 
-                    b.PrimitiveCollection<string>("MissingAtsKeywoards")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.PrimitiveCollection<string>("MissingSkills")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Recommendation")
+                    b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("Rejected")
@@ -69,14 +79,19 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("Remote")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("SeniorityFit")
+                    b.Property<string>("SalaryIsEstimated")
                         .HasColumnType("TEXT");
 
-                    b.PrimitiveCollection<string>("Strengths")
-                        .IsRequired()
+                    b.Property<string>("SalaryOriginalText")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Summary")
+                    b.Property<int>("Score")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Seniority")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TechKeywords")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Url");
