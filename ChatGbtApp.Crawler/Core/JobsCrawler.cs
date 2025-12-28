@@ -26,39 +26,39 @@ public class JobsCrawler
         _logger = logger;
         _maxParallelism = maxParallelism;
     }
-    public async Task CrawlJobsAsync(List<string> links)
+    public async Task CrawlJobsAsync(List<JobUrl> jobUrls)
     {
-        if (links.Count == 0)
+        if (jobUrls.Count == 0)
         {
             _logger.LogWarning("No URLs provided to crawl");
             return;
         }
 
-        _progress.Reset(links.Count);
+        _progress.Reset(jobUrls.Count);
         _logger.LogInformation("Starting crawl of {Count} job(s) with parallelism {Parallelism}", 
-            links.Count, _maxParallelism);
+            jobUrls.Count, _maxParallelism);
 
         await Parallel.ForEachAsync(
-            links,
+            jobUrls,
             new ParallelOptions { MaxDegreeOfParallelism = _maxParallelism },
-            async (url, ct) => await ProcessSingleJobAsync(url));
+            async (jobUrl, ct) => await ProcessSingleJobAsync(jobUrl));
 
         _progress.PrintSummary();
     }
 
-    private async Task ProcessSingleJobAsync(string url)
+    private async Task ProcessSingleJobAsync(JobUrl jobUrl)
     {
         try
         {
             using var scope = _scopeFactory.CreateScope();
             var processor = scope.ServiceProvider.GetRequiredService<JobProcessor>();
 
-            await processor.ProcessJobAsync(url);
+            await processor.ProcessJobAsync(jobUrl);
             _progress.LogProgress();
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "[{Url}] Unexpected error during processing", url);
+            _logger.LogCritical(ex, "[{jobUrl}] Unexpected error during processing", jobUrl);
         }
     }
 }

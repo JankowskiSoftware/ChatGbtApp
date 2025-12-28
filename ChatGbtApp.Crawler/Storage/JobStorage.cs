@@ -1,22 +1,26 @@
 ﻿using ChatGbtApp.Repository;
 using ChatGgtApp.Crawler.Progress;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace ChatGgtApp.Crawler.Storage;
 
-public class JobStorage(AppDbContext dbContext, ILogger<JobStorage> logger, JobProcessingProgress progress)
+public class JobStorage(IServiceScopeFactory scopeFactory, ILogger<JobStorage> logger, JobProcessingProgress progress)
 {
     private static readonly object _lock = new();
     
     public bool IsDuplicate(string url)
     {
+        using var scope = scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        
         lock (_lock)
         {
             var alreadyProcessed = dbContext.Jobs.Any(j => j.Url == url);
             if (alreadyProcessed)
             {
-                logger.LogInformation($"[{url}] Duplicate detected; URL already in database.");
+                logger.LogDebug($"[{url}] Duplicate detected; URL already in database.");
                 return true;
             } 
         }
@@ -26,6 +30,9 @@ public class JobStorage(AppDbContext dbContext, ILogger<JobStorage> logger, JobP
     
     public void Store(Job job)
     {
+        using var scope = scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        
         try
         {
             lock (_lock)
@@ -34,13 +41,15 @@ public class JobStorage(AppDbContext dbContext, ILogger<JobStorage> logger, JobP
                 dbContext.SaveChanges();
             }
 
-            logger.LogInformation($"[{job.Url}] Successfully stored job listing.");
+            logger.LogDebug($"[{job.Url}] Successfully stored job listing.");
         }
         catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
         {
-            logger.LogInformation($"[{job.Url}] Duplicate detected during save.");
+            logger.LogError($"[{job.Url}] Duplicate detected during save.");
         }
     }
+    
+    
 
     private static bool IsUniqueConstraintViolation(DbUpdateException ex) =>
         ex.InnerException?.Message.Contains("UNIQUE constraint failed", StringComparison.OrdinalIgnoreCase) == true;

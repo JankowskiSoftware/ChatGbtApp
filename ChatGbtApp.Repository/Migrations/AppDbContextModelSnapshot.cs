@@ -49,7 +49,7 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("HourlyMin")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("IsDotNetRole")
+                    b.Property<int?>("IsDistributed")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("JobDescription")
@@ -92,6 +92,9 @@ namespace ChatGbtApp.Repository.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TechKeywords")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Url2")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Url");

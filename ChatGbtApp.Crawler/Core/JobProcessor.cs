@@ -5,7 +5,10 @@ using ChatGgtApp.Crawler.Browser;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using ChatGgtApp.Crawler.Storage;
+using HtmlAgilityPack;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Playwright;
 
 namespace ChatGgtApp.Crawler.Core;
 
@@ -18,11 +21,27 @@ public class JobProcessor(
     IOpenAiApi openAiApi,
     Prompt prompt,
     ChromiumFactory chromiumFactory,
-    ILogger<JobProcessor> logger,
-    JobProcessingProgress progress)
+    JobProcessingProgress progress,
+    IServiceScopeFactory scopeFactory)
 {
-    public async Task ProcessJobAsync(string url)
+    private string[] _kewords = new[]
     {
+        ".NET",
+        "C#",
+        "dot",
+        "Sharp"
+    };
+
+    public async Task<List<string>> ProcessJobAsync(JobUrl jobUrl)
+    {
+        var logs = new List<string>();
+        
+        using var scope = scopeFactory.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var jobs = dbContext.Jobs.ToList();
+
+        var url = jobUrl.Url;
+
         if (jobStorage.IsDuplicate(url))
         {
             progress.RecordDuplicate();
@@ -30,79 +49,84 @@ public class JobProcessor(
             return;
         }
 
-        logger.LogInformation("[{Url}] Starting job processing...", url);
-
-        var jobDescription = await GetJobDescription(url);
+        var (jobPostingUrl,jobDescription) = await GetJobDescription(url);
+        
         if (string.IsNullOrWhiteSpace(jobDescription))
         {
             progress.RecordEmpty();
             logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
             return;
         }
-
-        logger.LogInformation("[{Url}] ChatGPT running simple prompt...", url);
-        var isDotNetRole = await ExecuteSimplePrompt(url, jobDescription);
-        if (!isDotNetRole)
+        
+        if (!string.IsNullOrWhiteSpace(jobPostingUrl) &&  jobStorage.IsDuplicate(jobPostingUrl))
         {
+            progress.RecordDuplicate();
+            logger.LogInformation("[{Url}] Skipping duplicate posting job", url);
+            return;
+        }
+
+        logger.LogDebug("[{Url}] Starting job processing...", url);
+
+        bool isDistributedBackend = IsDistributedBackend(jobUrl, jobDescription);
+        if (!isDistributedBackend)
+        {
+            StoreNotMatchingRole(url, jobPostingUrl, jobDescription);
             progress.RecordSuccess();
             logger.LogInformation("[{Url}] ChatGPT - Noe matching role", url);
             return;
         }
-
-        logger.LogInformation("[{Url}] ChatGPT running full prompt...", url);
-        await ExecuteFullPrompt(url, jobDescription);
+        
+        logger.LogDebug("[{Url}] ChatGPT running full prompt...", url);
+        await ExecuteFullPrompt(jobUrl, jobPostingUrl, jobDescription);
         progress.RecordSuccess();
     }
 
-    private async Task<string?> GetJobDescription(string url)
+    private async Task<(string? jobPostingUrl, string? jobDescription)> GetJobDescription(string url)
     {
         await using var chromium = chromiumFactory.Create();
         var page = await chromium.FetchAsync(url);
+
+        var htmlA = await page.SelectNodes("//div[contains(text(), 'Job Posting')]/parent::div/a");
+        string jobPostingUrl = htmlA.First().GetAttributeValue("href", "");
+        
         await page.WaitForTextAsync("Job Description");
-        return await page.InnerTextAsync("body");
+        var jobDescription = await page.InnerTextAsync("body");
+        
+        return (jobPostingUrl, jobDescription);
     }
 
-    private async Task<bool> ExecuteSimplePrompt(string url, string jobDescription)
+    private void StoreNotMatchingRole(string url, string jobPostingUrl, string jobDescription)
     {
-        // Evaluate if It looks like a good match.
-        var input = prompt.GetPrompt("simple-prompt", jobDescription);
-        var aiResponse = await openAiApi.AskAsync(input, "gpt-5-nano");
-
-        if (aiResponse.Contains("false"))
+        jobStorage.Store(new Job
         {
-            jobStorage.Store(new Job
-            {
-                Url = url,
-                JobDescription = jobDescription,
-                Message = "Not a good match",
-                Score = 0,
-            });
-
-            return false;
-        }
-
-        return true;
+            Url = url,
+            Url2 = jobPostingUrl,
+            JobDescription = jobDescription,
+            IsDistributed = 0,
+            Score = 0,
+        });
     }
 
-    private async Task ExecuteFullPrompt(string url, string jobDescription)
+    private async Task ExecuteFullPrompt(JobUrl jobUrl, string? jobPostingUrl, string jobDescription)
     {
         // Analyze with AI
-        logger.LogInformation("[{Url}] Requesting analysis from ChatGPT...", url);
-        var input = prompt.GetPrompt("full-prompt", jobDescription);
+        logger.LogDebug("[{Url}] Requesting analysis from ChatGPT...", jobUrl.Url);
+        var input = prompt.GetPrompt("prompt", jobDescription);
         var aiResponse = await openAiApi.AskAsync(input, "gpt-5-mini");
 
         var values = StringKeyValueParser.Parse(aiResponse);
 
         var job = new Job
         {
-            Url = url,
+            Url = jobUrl.Url,
+            Url2 = jobPostingUrl,
             JobDescription = jobDescription,
             Message = aiResponse,
-            JobTitle = values.Get("jobTitle"),
+            JobTitle = jobUrl.JobTitle,
             CompanyName = values.Get("companyName"),
             Location = values.Get("location"),
             Remote = values.Get("remote"),
-            IsDotNetRole = int.Parse(values.Get("isDotNetRole") ?? "-1"),
+            IsDistributed = int.Parse(values.Get("isDistributedBackand") ?? "-1"),
             MacroserviceScore = values.Get("microservicesScore"),
             ContractType = values.Get("contractType"),
             Seniority = values.Get("seniority"),
@@ -119,5 +143,21 @@ public class JobProcessor(
         };
 
         jobStorage.Store(job);
+    }
+
+    private bool IsDistributedBackend(JobUrl jobUrl, string jobDescription)
+    {
+        bool isDotNetRole = false;
+        foreach (var keword in _kewords)
+        {
+            if (jobUrl.JobTitle.Contains(keword, StringComparison.OrdinalIgnoreCase)
+                || jobDescription.Contains(keword, StringComparison.OrdinalIgnoreCase))
+            {
+                isDotNetRole = true;
+                break;
+            }
+        }
+
+        return isDotNetRole;
     }
 }

@@ -53,6 +53,6 @@ public class LoopCvLogger(
         await page.WaitForURLAsync("**/overview");
         // or: await page.WaitForSelectorAsync("css=selector-for-logged-in-ui");
 
-        logger.LogInformation("Saved auth state to {Path}", authStatePath);
+        logger.LogDebug("Saved auth state to {Path}", authStatePath);
     }
 }

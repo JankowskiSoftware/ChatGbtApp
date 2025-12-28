@@ -1,81 +1,96 @@
-﻿You are an assistant whose response is parsed automatically by software.
+﻿You extract structured information from a job offer.
 
-Follow these rules strictly:
-1. The response MUST contain two sections, in this exact order:
-   a) A short human-readable explanation (plain text)
-   b) A machine-readable results block
-2. The machine-readable block MUST:
-   - Be the last part of the response
-   - Start with exactly: <<<RESULTS>>>
-   - End with exactly: <<<END>>>
-   - Contain ONLY simple key=value pairs
-   - Contain EXACTLY 7 keys
-   - Use one key=value pair per line
-   - NOT contain any extra text, comments, or formatting
-3. If you cannot follow this format exactly, respond with: FORMAT_ERROR
+OUTPUT FORMAT (strict):
+- Return ONLY lines in the exact format: fieldName:value
+- EXACTLY the fields listed below, in the exact order, one per line.
+- No extra lines, no explanations, no markdown.
+- If unknown/not found: value must be null (literal "null").
+- Values must NOT contain semicolons. If the source text contains semicolons, replace them with commas.
+- For lists: use comma-separated values (no brackets).
 
-Task:
-I want you to check if my experience and Job expectations are matching the job description.
+FIELDS (output exactly these, in this exact order):
+companyName:
+location:
+remote:
+isDistributedBackand:
+contractType:
+seniority:
+currency:
+hourlyMin:
+hourlyMax:
+salaryIsEstimated:
+salaryOriginalText:
+deliveryPressureScore:
+techKeywords:
+confidence:
+notes:
+score:
 
+DEFINITIONS / RULES:
 
-MY EXPERIENCE AND EXPECTATIONS:
-{{CV}}
+companyName:
+- Company name. If unclear: null.
+
+location:
+- Country, City
+
+remote:
+- One of: remote, hybrid, onsite, unknown.
+
+isDistributedBackand:
+- Integer 1..5
+  5 - Only if ALL are true:
+      A) .NET backend is primary (C#/.NET/ASP.NET Core as main stack)
+      B) Distributed/microservices signal exists (microservices OR distributed systems OR Kubernetes/OpenShift/containers at scale OR Kafka/RabbitMQ/Service Bus OR “event-driven” OR “high-scale/multi-tenant” backend)
+      C) Not junior-only (Senior/Lead/5+ yrs/architecture/ownership OR clearly senior responsibilities)
+  1 - When position is monolith or simple code  
+      A) frontend-only, mobile-only, or desktop-only
+      B) NET is only “nice to have” and another stack is primary
+      C) internship/graduate/junior-only
+      
+contractType:
+- One of: B2B, employment, any, unknown.
+
+seniority:
+- One of: junior, mid, senior, lead, principal, unknown (infer from title/requirements).
+
+Salary -> hourly:
+- Extract salary info if present and normalize to hourlyMin/hourlyMax + currency.
+- If salary is present: salaryIsEstimated=false.
+- If salary is missing: estimate a reasonable hourly range for a senior .NET backend role in distributed systems,
+  set salaryIsEstimated=true. Make this estimation based on the country, city, company, position and that it would be remote.
+- If location/currency is unclear during estimation:
+  - Prefer EUR for remote EU roles; otherwise keep currency=null and still provide hourlyMin/hourlyMax.
+- Conversions:
+  - day rate => 8 hours/day
+  - week => 40 hours/week
+  - month => 173.33 hours/month (52*40/12)
+  - year => 2080 hours/year (52*40)
+
+currency:
+- Prefer ISO codes (PLN/EUR/USD/GBP). If unknown => null.
+
+salaryOriginalText:
+- Short snippet/summary of the salary line if present, else null.
+- Must not contain semicolons.
+
+deliveryPressureScore:
+- Integer 1..5:
+  1 = steady pace / quality focus
+  5 = explicit fast-paced / tight deadlines / high delivery pressure
+
+techKeywords:
+- Comma-separated list of up to ~20 key tech terms mentioned.
+
+confidence:
+- 1..5 numeric, based on how clearly the offer states the facts.
+
+notes:
+- Very short extra info / assumptions. No semicolons.
+
+score:
+- Integer 1..5 - how close this offer is to my requirements of: distributed .net backend well-payed senior remote role.  
+
 
 JOB DESCROPTION:
 {{JOB DESCROPTION}}
-
-
-SEMANTIC RULES (how to compute each value):
-
-company:
-- Company name.
-- Return null if not found.
-
-jobTitle:
-- the position name, the job title that the job description is for.
-- Return null if not found.
-
-matchScore:
-- Integer from 0 to 10
-- Represents overall suitability of the candidate for the role
-- Consider skills match, experience relevance and seniority
-- 0 = no match, 100 = perfect match
-
-seniorityFit:
-- One of: low, medium, high
-- Compare required seniority in the role with the candidate’s experience
-- high = clearly meets or exceeds expectations
-- medium = partially meets expectations
-- low = below expectations
-
-recommendation:
-- Short, actionable sentence
-- Examples: "Apply", "Apply with reservations", "Upskill before applying"
-- Base this on matchScore and seniorityFit
-
-remote:
-- One of: yes, maybe, no
-- is this likelly that I will be able to work remotely for this position from poland
-- yes = very likelly
-- maybe = there is a Chance for remote work from poland
-- no = most likelly there is no Chance for remote work from poland
-
-summary: 
-- one sentence summary that I will know what action should I take.
-
-dotNetRole:
-- One of yes, no
-- one if you are sure this is mainly .net backend role
-- no if its pyton, java or other stacks other then .net developer
-
-frontend:
-- values from 1-3 describeing how frontend havy the role is
-
-OUTPUT:
-Return a short explanation first, then the results block.
-
-
-
-
-
-

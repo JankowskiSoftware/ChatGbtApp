@@ -1,4 +1,5 @@
 ﻿using ChatGgtApp.Crawler.Extractors.Loopcv;
+using HtmlAgilityPack;
 using Microsoft.Playwright;
 
 namespace ChatGgtApp.Crawler.Browser;
@@ -69,13 +70,6 @@ public class Chromium(
         }
 
         return page;
-
-        // await page.WaitForTextCycleAsync("Loading items...");
-        // var textContent = await page.InnerTextAsync("body");
-        // var html = await page.ContentAsync();
-        // try { await page.CloseAsync(); } catch { }
-        //
-        // return new FetchResult { TextContent = textContent, Html = html };
     }
 
     public async ValueTask DisposeAsync()

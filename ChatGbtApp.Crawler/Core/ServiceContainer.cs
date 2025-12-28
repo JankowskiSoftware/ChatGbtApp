@@ -21,29 +21,30 @@ public static class ServiceContainer
         var services = new ServiceCollection();
 
         AddLogging(services);
+        
+        services.AddSingleton<JobProcessingProgress>();
 
         // HttpClient factory and named client for OpenAI
         services.AddHttpClient("OpenAI", client => { client.Timeout = TimeSpan.FromMinutes(3); });
 
-        services.AddDbContext<AppDbContext>(); // scoped by default
-        services.AddScoped<JobStorage>();
-        services.AddSingleton<StringKeyValueParser>();
-        services.AddSingleton<JobProcessingProgress>();
-        services.AddSingleton<Prompt>();
+        services.AddTransient<AppDbContext>(); 
+        services.AddTransient<JobStorage>();
+        services.AddTransient<StringKeyValueParser>();
+        services.AddTransient<Prompt>();
 
         // OpenAI API
-        services.AddSingleton<IResponseParser, OpenAiResponseParser>();
-        services.AddSingleton<OpenAiApiFactory>();
-        services.AddSingleton<IOpenAiApi>(provider =>
+        services.AddTransient<IResponseParser, OpenAiResponseParser>();
+        services.AddTransient<OpenAiApiFactory>();
+        services.AddTransient<IOpenAiApi>(provider =>
             provider.GetRequiredService<OpenAiApiFactory>().Create());
         services.AddScoped<JobProcessor>();
-        services.AddSingleton<JobsCrawler>();
-        services.AddSingleton<MatchesExtractor>();
-        services.AddSingleton<MatchesCrawler>();
-        services.AddSingleton<ChromiumFactory>();
+        services.AddTransient<JobsCrawler>();
+        services.AddTransient<MatchesExtractor>();
+        services.AddTransient<MatchesCrawler>();
+        services.AddTransient<ChromiumFactory>();
         
         // Loopcv login service
-        services.AddSingleton<LoopCvLogger>(provider =>
+        services.AddTransient<LoopCvLogger>(provider =>
             new LoopCvLogger(
                 provider.GetRequiredService<ILogger<LoopCvLogger>>(),
                 LoopcvConst.Email,

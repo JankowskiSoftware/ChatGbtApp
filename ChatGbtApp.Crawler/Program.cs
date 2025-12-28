@@ -21,9 +21,17 @@ var crawler = ServiceContainer.Resolve<JobsCrawler>();
 var jobsPath = SolutionDirectory.GetRepoPath(SolutionDirectory.Path_JobUrls);
 
 var jobs = File.ReadAllLines(jobsPath);
-var links = jobs
-    .Select(jobUrl => jobUrl.Split(',').Last().Trim())
-    .Take(10)
+var jobUrls = jobs
+    .Select(jobUrl =>
+    {
+        var comma = jobUrl.LastIndexOf(',');
+        var jobTitle = jobUrl.Substring(0, comma);
+        var url = jobUrl.Substring(comma + 1).Trim();
+        
+        return new JobUrl(url, jobTitle);
+
+    })
+    .Take(100)
     .ToList();
 
-await crawler.CrawlJobsAsync(links);
+await crawler.CrawlJobsAsync(jobUrls);

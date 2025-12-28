@@ -12,12 +12,13 @@ public class JobBase
 
 public class Job : JobBase
 {
+    public string? Url2 { get; set; }
     public string? JobTitle { get; set; }
     public string? CompanyName { get; set; }
     public string? Location { get; set; }
     
     public string? Remote { get; set; }
-    public int? IsDotNetRole { get; set; }
+    public int? IsDistributed { get; set; }
     public string? MacroserviceScore { get; set; }
     public string? ContractType { get; set; }
     public string? Seniority { get; set; }   // "low", "medium", "high" (nullable if not parseable)

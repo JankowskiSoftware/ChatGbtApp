@@ -9,11 +9,8 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var solutionRoot = SolutionDirectory.GetRepoPath();
+        var dbPath = SolutionDirectory.GetRepoPath(Path.Combine("data", "jobs.db"));
         
-        var dataDirectory = Path.Combine(solutionRoot, "data");
-        Directory.CreateDirectory(dataDirectory); // Ensure directory exists
-        var dbPath = Path.Combine(dataDirectory, "jobs.db");
         optionsBuilder.UseSqlite($"Data Source={dbPath}");
     }
 }
