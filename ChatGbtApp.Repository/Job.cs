@@ -19,13 +19,11 @@ public class Job : JobBase
     
     public string? Remote { get; set; }
     public int? IsDistributed { get; set; }
-    public string? MacroserviceScore { get; set; }
     public string? ContractType { get; set; }
     public string? Seniority { get; set; }   // "low", "medium", "high" (nullable if not parseable)
     public string? Currency { get; set; }
     public string? HourlyMin { get; set; }
     public string? HourlyMax { get; set; }
-    public string? SalaryIsEstimated { get; set; }
     public string? SalaryOriginalText { get; set; }
     public string? DeliveryPressureScore { get; set; }
     public string? TechKeywords { get; set; }

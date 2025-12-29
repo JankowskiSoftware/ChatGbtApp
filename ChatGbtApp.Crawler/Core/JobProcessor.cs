@@ -32,9 +32,11 @@ public class JobProcessor(
         "Sharp"
     };
 
-    public async Task<List<string>> ProcessJobAsync(JobUrl jobUrl)
+    public async Task<LogCollector> ProcessJobAsync(JobUrl jobUrl)
     {
-        var logs = new List<string>();
+        var logger = new LogCollector();
+        logger.LogInformation($"Starting job processing: [{jobUrl.JobTitle}], Url: [{jobUrl.Url}]");
+        
         
         using var scope = scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -45,8 +47,8 @@ public class JobProcessor(
         if (jobStorage.IsDuplicate(url))
         {
             progress.RecordDuplicate();
-            logger.LogInformation("[{Url}] Skipping duplicate job", url);
-            return;
+            logger.LogInformation($"Skipping duplicate job." );
+            return logger;
         }
 
         var (jobPostingUrl,jobDescription) = await GetJobDescription(url);
@@ -54,31 +56,38 @@ public class JobProcessor(
         if (string.IsNullOrWhiteSpace(jobDescription))
         {
             progress.RecordEmpty();
-            logger.LogWarning("[{Url}] Empty content detected; skipping store.", url);
-            return;
+            logger.LogWarning($"Empty content detected  skipping.");
+            return logger;
         }
         
         if (!string.IsNullOrWhiteSpace(jobPostingUrl) &&  jobStorage.IsDuplicate(jobPostingUrl))
         {
             progress.RecordDuplicate();
-            logger.LogInformation("[{Url}] Skipping duplicate posting job", url);
-            return;
+            logger.LogInformation($"Url2 duplicate detected skipping.");
+            return logger;
         }
 
-        logger.LogDebug("[{Url}] Starting job processing...", url);
 
         bool isDistributedBackend = IsDistributedBackend(jobUrl, jobDescription);
         if (!isDistributedBackend)
         {
             StoreNotMatchingRole(url, jobPostingUrl, jobDescription);
-            progress.RecordSuccess();
-            logger.LogInformation("[{Url}] ChatGPT - Noe matching role", url);
-            return;
+            progress.RecordReject();
+            logger.LogInformation($"Rejected.");
+            return logger;
         }
         
-        logger.LogDebug("[{Url}] ChatGPT running full prompt...", url);
-        await ExecuteFullPrompt(jobUrl, jobPostingUrl, jobDescription);
+        logger.LogDebug($"ChatGPT running prompt");
+        var job = await ExecuteFullPrompt(jobUrl, jobPostingUrl, jobDescription, logger);
         progress.RecordSuccess();
+        logger.LogInformation($"Finished Job: [{jobUrl.JobTitle}], Company: [{job.CompanyName}]");
+        logger.LogInformation($"   - Notes: {job.Notes}");
+        logger.LogInformation($"   - Location: {job.Location}");
+        logger.LogInformation($"   - Remote: {job.Remote}");
+        logger.LogInformation($"   - IsDistributed: {job.IsDistributed}");
+        logger.LogInformation($"   - Score: {job.Score}");
+        
+        return logger;
     }
 
     private async Task<(string? jobPostingUrl, string? jobDescription)> GetJobDescription(string url)
@@ -104,13 +113,12 @@ public class JobProcessor(
             JobDescription = jobDescription,
             IsDistributed = 0,
             Score = 0,
+            Rejected = true
         });
     }
 
-    private async Task ExecuteFullPrompt(JobUrl jobUrl, string? jobPostingUrl, string jobDescription)
+    private async Task<Job> ExecuteFullPrompt(JobUrl jobUrl, string? jobPostingUrl, string jobDescription, LogCollector logger)
     {
-        // Analyze with AI
-        logger.LogDebug("[{Url}] Requesting analysis from ChatGPT...", jobUrl.Url);
         var input = prompt.GetPrompt("prompt", jobDescription);
         var aiResponse = await openAiApi.AskAsync(input, "gpt-5-mini");
 
@@ -127,7 +135,6 @@ public class JobProcessor(
             Location = values.Get("location"),
             Remote = values.Get("remote"),
             IsDistributed = int.Parse(values.Get("isDistributedBackand") ?? "-1"),
-            MacroserviceScore = values.Get("microservicesScore"),
             ContractType = values.Get("contractType"),
             Seniority = values.Get("seniority"),
             Currency = values.Get("currency"),
@@ -143,6 +150,8 @@ public class JobProcessor(
         };
 
         jobStorage.Store(job);
+        
+        return job;
     }
 
     private bool IsDistributedBackend(JobUrl jobUrl, string jobDescription)

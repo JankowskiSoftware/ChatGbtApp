@@ -10,8 +10,17 @@ public class JobProcessingProgress(ILogger<JobProcessingProgress> logger)
     private int _successCount = 0;
     private int _duplicateCount = 0;
     private int _emptyCount = 0;
-    private int _total;
+    private int _total = 0;
+    private int _rejected = 0;
 
+    public void RecordReject()
+    {
+        lock (_lockObj)
+        {
+            _totalProcessed++;
+            _rejected++;
+        }
+    }
     public void RecordSuccess()
     {
         lock (_lockObj)
@@ -44,9 +53,8 @@ public class JobProcessingProgress(ILogger<JobProcessingProgress> logger)
         lock (_lockObj)
         {
             logger.LogInformation(
-                $"[Progress] Completed: {_totalProcessed}/{_total} |  Stored: {_successCount} |  Duplicates: {_duplicateCount} |  Empty: {_emptyCount}"
+                $"        [Progress] Completed: {_totalProcessed}/{_total} |  Stored: {_successCount} |  Duplicates: {_duplicateCount} | Rejected: {_rejected}  |  Empty: {_emptyCount}"
             );
-            logger.LogInformation("");
         }
     }
     

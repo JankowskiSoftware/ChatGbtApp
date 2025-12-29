@@ -15,17 +15,20 @@ public class JobsCrawler
     private readonly ILogger<JobsCrawler> _logger;
     private readonly int _maxParallelism;
 
+    private object _lock = new();
+
     public JobsCrawler(
         IServiceScopeFactory scopeFactory,
         JobProcessingProgress progress,
         ILogger<JobsCrawler> logger,
-        int maxParallelism = 1)
+        int maxParallelism = 10)
     {
         _scopeFactory = scopeFactory;
         _progress = progress;
         _logger = logger;
         _maxParallelism = maxParallelism;
     }
+
     public async Task CrawlJobsAsync(List<JobUrl> jobUrls)
     {
         if (jobUrls.Count == 0)
@@ -35,7 +38,7 @@ public class JobsCrawler
         }
 
         _progress.Reset(jobUrls.Count);
-        _logger.LogInformation("Starting crawl of {Count} job(s) with parallelism {Parallelism}", 
+        _logger.LogInformation("Starting crawl of {Count} job(s) with parallelism {Parallelism}",
             jobUrls.Count, _maxParallelism);
 
         await Parallel.ForEachAsync(
@@ -48,17 +51,31 @@ public class JobsCrawler
 
     private async Task ProcessSingleJobAsync(JobUrl jobUrl)
     {
+        var logs = new LogCollector();
         try
         {
             using var scope = _scopeFactory.CreateScope();
             var processor = scope.ServiceProvider.GetRequiredService<JobProcessor>();
 
-            await processor.ProcessJobAsync(jobUrl);
-            _progress.LogProgress();
+            logs = await processor.ProcessJobAsync(jobUrl);
         }
         catch (Exception ex)
         {
             _logger.LogCritical(ex, "[{jobUrl}] Unexpected error during processing", jobUrl);
+        }
+        finally
+        {
+            var logger = _scopeFactory.CreateScope().ServiceProvider
+                .GetRequiredService<ILogger<JobProcessingProgress>>();
+            
+            lock (_lock)
+            {
+                logger.Log(LogLevel.Information, "");
+                logs.WriteLogsTo(logger);
+                _progress.LogProgress();
+                logger.Log(LogLevel.Information, "");
+            }
+
         }
     }
 }

@@ -18,7 +18,6 @@ seniority:
 currency:
 hourlyMin:
 hourlyMax:
-salaryIsEstimated:
 salaryOriginalText:
 deliveryPressureScore:
 techKeywords:
@@ -56,11 +55,6 @@ seniority:
 
 Salary -> hourly:
 - Extract salary info if present and normalize to hourlyMin/hourlyMax + currency.
-- If salary is present: salaryIsEstimated=false.
-- If salary is missing: estimate a reasonable hourly range for a senior .NET backend role in distributed systems,
-  set salaryIsEstimated=true. Make this estimation based on the country, city, company, position and that it would be remote.
-- If location/currency is unclear during estimation:
-  - Prefer EUR for remote EU roles; otherwise keep currency=null and still provide hourlyMin/hourlyMax.
 - Conversions:
   - day rate => 8 hours/day
   - week => 40 hours/week
@@ -86,7 +80,7 @@ confidence:
 - 1..5 numeric, based on how clearly the offer states the facts.
 
 notes:
-- Very short extra info / assumptions. No semicolons.
+- Is it a good fit for a backend distributed system. Short extra info / assumptions. 
 
 score:
 - Integer 1..5 - how close this offer is to my requirements of: distributed .net backend well-payed senior remote role.  

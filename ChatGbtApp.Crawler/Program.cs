@@ -31,7 +31,7 @@ var jobUrls = jobs
         return new JobUrl(url, jobTitle);
 
     })
-    .Take(100)
+    //.Take(100)
     .ToList();
 
 await crawler.CrawlJobsAsync(jobUrls);

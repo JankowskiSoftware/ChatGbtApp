@@ -67,6 +67,9 @@ public static class ServiceContainer
                 options.TimestampFormat = "HH:mm:ss ";
             });
             builder.SetMinimumLevel(LogLevel.Information);
+            
+            // Disable OpenAI HttpClient request/response Info logs
+            builder.AddFilter("System.Net.Http.HttpClient.OpenAI", LogLevel.Warning);
         });
         _provider = services.BuildServiceProvider();
     }
