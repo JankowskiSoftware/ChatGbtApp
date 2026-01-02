@@ -3,7 +3,7 @@ using Microsoft.Playwright;
 
 namespace ChatGgtApp.Crawler.Browser;
 
-public static  class PageExtensions
+public static  class PageExtensionlll
 {
     public static async Task<HtmlNodeCollection> SelectNodes(this IPage page, string xpath)
     {

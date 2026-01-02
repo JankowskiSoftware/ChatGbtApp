@@ -12,6 +12,7 @@ FIELDS (output exactly these, in this exact order):
 companyName:
 location:
 remote:
+PL_remote:
 isDistributedBackand:
 contractType:
 seniority:
@@ -35,6 +36,11 @@ location:
 
 remote:
 - One of: remote, hybrid, onsite, unknown.
+
+plRemote:
+- Integer [1..5]
+  5 - It is very likely that remote from Poland is allowed.
+  1 - No chance for remote work from Poland.
 
 isDistributedBackand:
 - Integer 1..5

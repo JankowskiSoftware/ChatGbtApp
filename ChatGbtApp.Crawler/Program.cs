@@ -12,10 +12,17 @@ var logger = loggerFactory.CreateLogger("Crawler");
 logger.LogInformation("Crawler started...");
 
 
+
+//////////////////// MATCHES CRAWLER //////////////////////////
+
 // await  ServiceContainer
 //     .Resolve<MatchesCrawler>()
 //     .CrawlAsync("https://app.loopcv.pro/matches");
 
+
+
+
+//////////////////// JOBS CRAWLER //////////////////////////
 
 var crawler = ServiceContainer.Resolve<JobsCrawler>();
 var jobsPath = SolutionDirectory.GetRepoPath(SolutionDirectory.Path_JobUrls);

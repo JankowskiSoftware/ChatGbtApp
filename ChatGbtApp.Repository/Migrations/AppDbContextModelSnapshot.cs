@@ -46,6 +46,9 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("HourlyMax")
                         .HasColumnType("TEXT");
 
+                    b.Property<decimal?>("HourlyMaxPLN")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("HourlyMin")
                         .HasColumnType("TEXT");
 
@@ -61,9 +64,6 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("MacroserviceScore")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Marked")
                         .HasColumnType("INTEGER");
 
@@ -73,13 +73,13 @@ namespace ChatGbtApp.Repository.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("PlRemote")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("Rejected")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Remote")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SalaryIsEstimated")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SalaryOriginalText")

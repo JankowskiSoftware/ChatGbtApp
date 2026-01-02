@@ -21,7 +21,7 @@ public class JobsCrawler
         IServiceScopeFactory scopeFactory,
         JobProcessingProgress progress,
         ILogger<JobsCrawler> logger,
-        int maxParallelism = 10)
+        int maxParallelism = 1)
     {
         _scopeFactory = scopeFactory;
         _progress = progress;

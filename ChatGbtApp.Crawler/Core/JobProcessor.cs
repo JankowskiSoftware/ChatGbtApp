@@ -95,7 +95,8 @@ public class JobProcessor(
         await using var chromium = chromiumFactory.Create();
         var page = await chromium.FetchAsync(url);
 
-        var htmlA = await page.SelectNodes("//div[contains(text(), 'Job Posting')]/parent::div/a");
+        // var htmlA = await page.SelectNodes("//div[contains(text(), 'Job Posting')]/parent::div/a");
+        var htmlA = await page.SelectNodes("//div[@class = 'sm:w-8/12 list-none']//h3//a");
         string jobPostingUrl = htmlA.First().GetAttributeValue("href", "");
         
         await page.WaitForTextAsync("Job Description");
@@ -123,7 +124,9 @@ public class JobProcessor(
         var aiResponse = await openAiApi.AskAsync(input, "gpt-5-mini");
 
         var values = StringKeyValueParser.Parse(aiResponse);
-
+        
+        int.TryParse(values.Get("plRemote"), out var plRemote);
+        
         var job = new Job
         {
             Url = jobUrl.Url,
@@ -134,13 +137,14 @@ public class JobProcessor(
             CompanyName = values.Get("companyName"),
             Location = values.Get("location"),
             Remote = values.Get("remote"),
+            PlRemote = plRemote,
             IsDistributed = int.Parse(values.Get("isDistributedBackand") ?? "-1"),
             ContractType = values.Get("contractType"),
             Seniority = values.Get("seniority"),
             Currency = values.Get("currency"),
             HourlyMin = values.Get("hourlyMin"),
             HourlyMax = values.Get("hourlyMax"),
-            SalaryIsEstimated = values.Get("salaryIsEstimated"),
+            HourlyMaxPLN = ConvertToPln(values.Get("currency"), values.Get("hourlyMax")),
             SalaryOriginalText = values.Get("salaryOriginalText"),
             DeliveryPressureScore = values.Get("deliveryPressureScore"),
             TechKeywords = values.Get("techKeywords"),
@@ -168,5 +172,20 @@ public class JobProcessor(
         }
 
         return isDotNetRole;
+    }
+    
+    private decimal ConvertToPln(string currency, string amount)
+    {
+        Decimal.TryParse(amount, out decimal amount1);
+        
+        decimal rate = currency switch
+        {
+            "GBP" => 4.8m, // British Pound → PLN
+            "USD" => 3.6m, // US Dollar → PLN
+            "EUR" => 4.2m, // Euro → PLN
+            _ => 0
+        };
+
+        return amount1 * rate;
     }
 }
