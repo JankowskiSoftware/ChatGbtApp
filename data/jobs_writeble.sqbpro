@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><sqlb_project><db path="jobs.db" readonly="0" foreign_keys="1" case_sensitive_like="0" temp_store="0" wal_autocheckpoint="1000" synchronous="2"/><attached/><window><main_tabs open="structure browser pragmas query" current="3"/></window><tab_structure><column_width id="0" width="300"/><column_width id="1" width="0"/><column_width id="2" width="100"/><column_width id="3" width="4323"/><column_width id="4" width="0"/><expanded_item id="0" parent="1"/><expanded_item id="1" parent="1"/><expanded_item id="2" parent="1"/><expanded_item id="3" parent="1"/></tab_structure><tab_browse><table title="Jobs" custom_title="0" dock_id="2" table="4,4:mainJobs"/><dock_state state="000000ff00000000fd000000010000000200000b90000004f6fc0100000002fb000000160064006f0063006b00420072006f00770073006500310100000000000009980000000000000000fb000000160064006f0063006b00420072006f0077007300650032010000000000000b900000012d00ffffff00000b900000000000000004000000040000000800000008fc00000000"/><default_encoding codec=""/><browse_table_settings><table schema="main" name="Jobs" show_row_id="0" encoding="" plot_x_axis="" unlock_view_pk="_rowid_" freeze_columns="0"><sort/><column_widths><column index="1" value="300"/><column index="2" value="50"/><column index="3" value="300"/><column index="4" value="70"/><column index="5" value="85"/><column index="6" value="58"/><column index="7" value="218"/><column index="8" value="133"/><column index="9" value="68"/><column index="10" value="90"/><column index="11" value="65"/><column index="12" value="81"/><column index="13" value="300"/><column index="14" value="300"/><column index="15" value="300"/><column index="16" value="50"/><column index="17" value="300"/><column index="18" value="300"/><column index="19" value="62"/><column index="20" value="57"/><column index="21" value="62"/><column index="22" value="300"/><column index="23" value="39"/><column index="24" value="62"/><column index="25" value="300"/><column index="26" value="300"/></column_widths><filter_values/><conditional_formats/><row_id_formats/><display_formats/><hidden_columns/><plot_y_axes/><global_filter/></table></browse_table_settings></tab_browse><tab_sql><sql name="Update">UPDATE Jobs
+SET Marked = 1
+WHERE Url IN (
+    'https://app.loopcv.pro/match/694bdb8737f97b129cca0321',
+    'https://app.loopcv.pro/match/694bd6835aa4f9155308d5c8',
+    'https://app.loopcv.pro/match/694bdb872b20ed4e928f6203',
+    'https://app.loopcv.pro/match/6945539cb30e8ffcba292486'
+);
+
+
+
+
+
+UPDATE Jobs
+SET Applied= 1
+WHERE Url IN (
+    'https://app.loopcv.pro/match/69455a9bf09218bd2ef75ce7'
+);
+
+
+UPDATE Jobs
+SET Rejected = 1
+WHERE Url IN (
+    'https://app.loopcv.pro/match/694be74d37f97b129ccc4885',
+    'https://app.loopcv.pro/match/694bdc345aa4f9155309ddde',
+    'https://app.loopcv.pro/match/694bd4bc0ea2eeab077d1416',
+    'https://app.loopcv.pro/match/69455a9a6c66891167108783',
+    'https://app.loopcv.pro/match/694bdc301afabd962da8e76f',
+    'https://app.loopcv.pro/match/694bdc18b238d103d3ed8c17',
+    'https://app.loopcv.pro/match/694bdc175aa4f9155309da8d',
+    'https://app.loopcv.pro/match/694bdbe85aa4f9155309d1d0',
+    'https://app.loopcv.pro/match/694bd6806c6689116787e2f9',
+    'https://app.loopcv.pro/match/694bd31a1afabd962da7346c',
+    'https://app.loopcv.pro/match/694aa3b4153c173b55022ccb',
+    'https://app.loopcv.pro/match/69484f6d1afabd962d677f21',
+    'https://app.loopcv.pro/match/69483a976c668911674b6f0c',
+    'https://app.loopcv.pro/match/6946f1bf2b20ed4e923e4a1a',
+    'https://app.loopcv.pro/match/69454fb5f09218bd2ef59979',
+    'https://app.loopcv.pro/match/694bdb87f09218bd2e759a67',
+    'https://app.loopcv.pro/match/694583d84e001327fb1259a0',
+    'https://app.loopcv.pro/match/694583d7b238d103d37664c7',
+    'https://app.loopcv.pro/match/694583dbf09218bd2efcae0f',
+    'https://app.loopcv.pro/match/6945769b4e001327fb10ca5f',
+    'https://app.loopcv.pro/match/69455a8af4e24421b30dd805',
+    'https://app.loopcv.pro/match/6946bd12b238d103d392465f',
+    'https://app.loopcv.pro/match/694583d937f97b129c508ab4',
+    'https://app.loopcv.pro/match/69455a885aa4f915538d6af5',
+    'https://app.loopcv.pro/match/6945539c5aa4f915538c4254',
+    'https://app.loopcv.pro/match/694553964e001327fb0bcff8',
+    'https://app.loopcv.pro/match/694bdc9037f97b129cca357d',
+    'https://app.loopcv.pro/match/694bdc642073c75a7cf70a37',
+    'https://app.loopcv.pro/match/694bdc47e2e0949003744d5d',
+    'https://app.loopcv.pro/match/694bdc322b20ed4e928f7e08',
+    'https://app.loopcv.pro/match/69455a86c334b011d5f14366'
+);
+
+</sql><sql name="Select*">SELECT
+	datetime,
+	Url,
+	JobDescription,
+	JobTitle,
+	CompanyName,
+	Location, 
+	Remote, 
+	PlRemote,
+	Score, 
+	IsDistributed,
+	Notes,
+	HourlyMaxPLN,
+-- 	CASE 
+-- 		WHEN SalaryIsEstimated = 'true' THEN NULL
+-- 		ELSE
+-- 			CASE j.Currency
+-- 				WHEN 'PLN' THEN j.HourlyMax
+-- 				WHEN 'EUR' THEN j.HourlyMax * 4.22
+-- 				WHEN 'USD' THEN j.HourlyMax * 3.54
+-- 				WHEN 'GBP' THEN j.HourlyMax * 4.79
+-- 				ELSE NULL
+-- 			END
+-- 	END AS HourlyMaxPLN,
+
+	SalaryOriginalText,
+	DeliveryPressureScore,
+	ContractType,
+	Seniority,
+	TechKeywords
+FROM Jobs AS j
+WHERE 
+    j.JobTitle IS NOT NULL
+    AND (j.Remote = 'remote' OR j.Location LIKE '%Wrocław%')
+	AND CompanyName not in ('Sii Poland' , 'Luxoft')
+	AND Rejected = 0
+	AND Applied = 0
+	and Marked = 0
+	and datetime &gt;= '2025-12-29'
+ORDER BY j.Score DESC;
+</sql><current_tab id="1"/></tab_sql></sqlb_project>
