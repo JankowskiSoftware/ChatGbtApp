@@ -3,19 +3,22 @@ using ChatGbtApp.Repository;
 using ChatGbtApp.Interfaces;
 using ChatGbtApp.Services;
 using ChatGgtApp.Crawler.Browser;
+using ChatGgtApp.Crawler.Extensions;
 using ChatGgtApp.Crawler.Extractors.Loopcv;
 using ChatGgtApp.Crawler.Parsers;
 using ChatGgtApp.Crawler.Progress;
 using ChatGgtApp.Crawler.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using CredentialManagement;
+using Microsoft.Extensions.Configuration;
 
 namespace ChatGgtApp.Crawler.Core;
 
 public static class ServiceContainer
 {
     private static IServiceProvider? _provider;
-
+    
     public static void Configure()
     {
         var services = new ServiceCollection();
@@ -42,18 +45,21 @@ public static class ServiceContainer
         services.AddTransient<MatchesExtractor>();
         services.AddTransient<MatchesCrawler>();
         services.AddTransient<ChromiumFactory>();
-        
-        // Loopcv login service
-        services.AddTransient<LoopCvLogger>(provider =>
-            new LoopCvLogger(
-                provider.GetRequiredService<ILogger<LoopCvLogger>>(),
-                LoopcvConst.Email,
-                LoopcvConst.Password,
-                LoopcvConst.LoginUrl
-            )
-        );
+        services.AddTransient<SecretsLoader>();
+        services.AddTransient<LoopCvLogger>();
+        services.AddSingleton<IConfiguration>(provider => BuildConfiguration());
         
         _provider = services.BuildServiceProvider();
+    }
+    
+    public static IConfigurationRoot BuildConfiguration()
+    {
+        return new ConfigurationBuilder()
+            .AddJsonFile(
+                "appsettings.json",
+                optional: false,
+                reloadOnChange: true)
+            .Build();
     }
 
     private static void AddLogging(ServiceCollection services)
