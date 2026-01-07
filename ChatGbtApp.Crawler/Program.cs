@@ -15,10 +15,11 @@ logger.LogInformation("Crawler started...");
 
 //////////////////// MATCHES CRAWLER //////////////////////////
 
-// await  ServiceContainer
-//     .Resolve<MatchesCrawler>()
-//     .CrawlAsync("https://app.loopcv.pro/matches");
+await  ServiceContainer
+    .Resolve<MatchesCrawler>()
+    .CrawlAsync("https://www.linkedin.com/jobs/");
 
+return;
 
 
 
