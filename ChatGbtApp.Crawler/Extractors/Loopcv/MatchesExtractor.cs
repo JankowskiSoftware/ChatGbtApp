@@ -1,4 +1,5 @@
-﻿using ChatGgtApp.Crawler.Browser;
+﻿using ChatGbtApp;
+using ChatGgtApp.Crawler.Browser;
 using ChatGgtApp.Crawler.Core;
 using Microsoft.Extensions.Logging;
 using Microsoft.Playwright;
@@ -24,18 +25,21 @@ public class MatchesExtractor(ChromiumFactory chromiumFactory)
             {
                 break;
             }
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded);
+            await page.ScreenshotAsync(new() { Path = SolutionDirectory.GetRepoPath("page.png"), FullPage = true });
+            File.WriteAllText( SolutionDirectory.GetRepoPath("page.html"),await page.ContentAsync());
 
-            var jobLinks = await page.SelectNodes("//tbody/tr/td[2]/a"); 
+            var jobLinks =  page.Locator("a[data-control-id]").EnumerateAsync(); 
             if (jobLinks == null)
             {
                 throw new Exception("No job links found on matches page");
             }
-            
-            foreach (var link in jobLinks)
+
+            await foreach (var link in jobLinks)
             {
-                string jobTitle = link.InnerText.Trim();
-                string url = link.GetAttributeValue("href", "");
-                results.Add(new JobLink(jobTitle, LoopcvConst.MainUrl + url));
+                string jobTitle = await link.InnerTextAsync();
+                string? url = await link.GetAttributeAsync("href");
+                results.Add(new JobLink(jobTitle, "https://www.linkedin.com/" + url));
             }
 
             Console.WriteLine($"Loaded {results.Count} pages.");
